@@ -1,0 +1,1 @@
+require('dotenv').config() // adds the ability to create environment variables
