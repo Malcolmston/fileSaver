@@ -83,3 +83,43 @@ const Files = sequelize.define("files", {
         allowNull: false,
     }
 }, { paranoid: true });
+
+const User = sequelize.define("user", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+
+    type: {
+        type: DataTypes.TEXT,
+        isNull: false,
+    },
+
+    firstName: DataTypes.TEXT,
+    lastName: DataTypes.TEXT,
+
+    username: {
+        type: DataTypes.TEXT,
+        unique: true,
+    },
+
+    password: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+
+        set: function (password) {
+            let hash = bcrypt.hashSync(password, salt);
+
+            this.setDataValue('password', hash)
+        }
+
+    },
+
+    email: {
+        type: DataTypes.TEXT,
+        unique: true,
+        isEmail: true,
+    },
+
+}, { paranoid: true });
