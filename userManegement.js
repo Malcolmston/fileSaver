@@ -134,3 +134,10 @@ const Logger = sequelize.define("logger", {
     message: DataTypes.TEXT,
 
 }, { paranoid: true })
+
+
+User.hasMany(Logger);
+Logger.belongsTo(User);
+
+User.hasMany(Files);
+Files.belongsTo(User);
