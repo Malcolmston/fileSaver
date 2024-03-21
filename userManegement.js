@@ -123,3 +123,14 @@ const User = sequelize.define("user", {
     },
 
 }, { paranoid: true });
+
+const Logger = sequelize.define("logger", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+
+    message: DataTypes.TEXT,
+
+}, { paranoid: true })
