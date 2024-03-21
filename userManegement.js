@@ -141,3 +141,7 @@ Logger.belongsTo(User);
 
 User.hasMany(Files);
 Files.belongsTo(User);
+
+(async () => {
+    await sequelize.sync({ force: true });
+})()
