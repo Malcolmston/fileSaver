@@ -147,8 +147,36 @@ Files.belongsTo(User);
  */
 class Account {
     constructor () {
-        
+
     }
+
+        /**
+     * Create a new account if it does not already exist.
+     * @param {String} username The username of the account to create/look at
+     * @param {String} password A password, that is hashed before entering the SQL database
+     * @param {String} email The email of the user's account
+     * @param {"Basic" | "Admin" | "Log"} type The account type
+     * @param {String | null} firstName A user's first name
+     * @param {String | null} lastName A user's last name
+     * @returns {Object|Boolean} Returns user data if account created successfully, or false if the account already exists or an error occurred.
+     */
+        static async createSafely(username, password, email, type = "Basic", firstName = null, lastName = null) {
+            try {
+                let user = await User.findOne({ where: { username } });
+    
+                if (user) {
+                    return false; // Account already exists
+                }
+    
+                user = await User.create({ username, password, type, firstName, lastName, email });
+        
+                return user.toJSON();
+            } catch (error) {
+                console.error("Error creating account:", error);
+                return false;
+            }
+        }
+    
 }
 
 (async () => {
