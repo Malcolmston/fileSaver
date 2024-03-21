@@ -142,6 +142,15 @@ Logger.belongsTo(User);
 User.hasMany(Files);
 Files.belongsTo(User);
 
+/**
+ * Create and manage accounts for users
+ */
+class Account {
+    constructor () {
+        
+    }
+}
+
 (async () => {
     await sequelize.sync({ force: true });
 })()
