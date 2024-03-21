@@ -9,6 +9,8 @@ if (!salt) {
     process.exit(1);
 }
 
+const { Sequelize, DataTypes, Op } = require('sequelize');
+
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'database.sqlite',
@@ -16,9 +18,6 @@ const sequelize = new Sequelize({
     benchmark: true,
     logging: false,
 });
-
-
-const { Sequelize, DataTypes, Op } = require('sequelize');
 
 const byteSize = require('byte-size')
 const bcrypt = require("bcrypt");
@@ -188,4 +187,8 @@ class Account {
 
 (async () => {
     await sequelize.sync({ force: true });
+
+    console.log( 
+        await Account.createSafely("a", "a", "a@a")
+    );
 })()
