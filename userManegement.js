@@ -9,6 +9,13 @@ if (!salt) {
     process.exit(1);
 }
 
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: 'database.sqlite',
+    standardConformingStrings: true,
+    benchmark: true,
+    logging: false,
+});
 
 
 const { Sequelize, DataTypes, Op } = require('sequelize');
