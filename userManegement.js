@@ -157,6 +157,21 @@ class Account {
     }
 
     /**
+     * Check if the account exists.
+     * @param {String} username The username of the account to create/look at
+     * @returns {Boolean} True if the account exists, false otherwise.
+     */
+    static async userExists(username) {
+        try {
+            const user = await User.findOne({ where: { username } });
+            return !!user;
+        } catch (error) {
+            console.error("Error checking if user exists:", error);
+            return false;
+        }
+    }
+
+    /**
  * Create a new account if it does not already exist.
  * @param {String} username The username of the account to create/look at
  * @param {String} password A password, that is hashed before entering the SQL database
