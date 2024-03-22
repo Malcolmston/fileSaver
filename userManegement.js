@@ -153,7 +153,7 @@ Files.belongsTo(User);
  * Create and manage accounts for users
  */
 class Account {
-    constructor () {
+    constructor() {
 
     }
 
@@ -172,22 +172,22 @@ class Account {
         }
     }
 
-        /**
-     * Check if the account has been deleted.
-     * @param {String} username account username
-     * @returns {Boolean} True if the account has been deleted, false otherwise.
-     */
-        static async isDeleted(username) {
-            try {
-                if( await this.userExists(username) ) return false;
+    /**
+ * Check if the account has been deleted.
+ * @param {String} username account username
+ * @returns {Boolean} True if the account has been deleted, false otherwise.
+ */
+    static async isDeleted(username) {
+        try {
+            if (await this.userExists(username)) return false;
 
-                let user = await User.findOne({ where: { username, deletedAt: {[Op.ne]: [null]} } });
-                return user != null;
-            } catch (error) {
-                console.error("Error checking if account is deleted:", error);
-                return false;
-            }
+            let user = await User.findOne({ where: { username, deletedAt: { [Op.ne]: [null] } } });
+            return user != null;
+        } catch (error) {
+            console.error("Error checking if account is deleted:", error);
+            return false;
         }
+    }
 
     /**
  * Create a new account if it does not already exist.
@@ -201,9 +201,9 @@ class Account {
  */
     static async createSafely(username, password, email, type = "Basic", firstName = null, lastName = null) {
         try {
-            
 
-            if ( !(await this.deleteAccount(username)) ) {
+
+            if (!(await this.deleteAccount(username))) {
                 return false; // Account already exists
             }
 
@@ -232,45 +232,45 @@ class Account {
     }
 
 
-        /**
-     * Softly delete the account.
-     * @param {String} username the users username 
-     * @returns {Boolean} True if the account was deleted, false otherwise.
-     */
-       static async deleteAccount(username) {
-            try {
-                if( await this.isDeleted(username) ) return false;
-    
-                await User.destroy({where: {username}});
+    /**
+ * Softly delete the account.
+ * @param {String} username the users username 
+ * @returns {Boolean} True if the account was deleted, false otherwise.
+ */
+    static async deleteAccount(username) {
+        try {
+            if (await this.isDeleted(username)) return false;
 
-                return true;
-            } catch (error) {
-                console.error("Error deleting account:", error);
-                return false;
-            }
+            await User.destroy({ where: { username } });
+
+            return true;
+        } catch (error) {
+            console.error("Error deleting account:", error);
+            return false;
         }
+    }
 
-        /**
-         * restores softly deleted accounts 
-         * @param {String} username the users username 
-         * @returns 
-         */
-        static async restoreAccount(username) {
-            try {
-             if ( (await this.deleteAccount(username)) ) {
+    /**
+     * restores softly deleted accounts 
+     * @param {String} username the users username 
+     * @returns 
+     */
+    static async restoreAccount(username) {
+        try {
+            if ((await this.deleteAccount(username))) {
                 return false; // Account already exists
             }
-    
-                await user.restore();
 
-                return true;
-            } catch (error) {
-                console.error("Error restoring account:", error);
-                return false;
-            }
+            await user.restore();
+
+            return true;
+        } catch (error) {
+            console.error("Error restoring account:", error);
+            return false;
         }
+    }
 
-    
+
     /**
      * Change the user's first name.
      * @param {String} firstName The new first name.
@@ -278,11 +278,11 @@ class Account {
      */
     static async changeFirstName(username, firstName) {
         try {
-            if ( (await this.isDeleted(username)) ) {
+            if ((await this.isDeleted(username))) {
                 return false;
             }
-            let a = await User.update({firstName}, {where: {username}, limit: 1 } );
-        
+            let a = await User.update({ firstName }, { where: { username }, limit: 1 });
+
             return a[0] == 1;
         } catch (error) {
             console.error("Error changing first name:", error);
@@ -290,44 +290,44 @@ class Account {
         }
     }
 
-     /**
-     * Change the user's last name.
-     * @param {String} lastName The new first name.
-     * @returns {Boolean} True if the first name was successfully changed, false otherwise.
-     */
-     static async changeLastName(username, lastName) {
+    /**
+    * Change the user's last name.
+    * @param {String} lastName The new first name.
+    * @returns {Boolean} True if the first name was successfully changed, false otherwise.
+    */
+    static async changeLastName(username, lastName) {
         try {
-            if ( (await this.isDeleted(username)) ) {
+            if ((await this.isDeleted(username))) {
                 return false;
             }
-            let a = await User.update({lastName}, {where: {username}, limit: 1 } );
-        
+            let a = await User.update({ lastName }, { where: { username }, limit: 1 });
+
             return a[0] == 1;
         } catch (error) {
             console.error("Error changing last name:", error);
             return false;
         }
-    }   
-  
-         /**
-     * Change the user's username.
-     * @param {String} username.
-     * @param {String} newUsername  the new username.
-     * @returns {Boolean} True if the first name was successfully changed, false otherwise.
-     */
-         static async changeUsername(username, newUsername) {
-            try {
-                if ( (await this.isDeleted(username)) ) {
-                    return false;
-                }
-                let a = await User.update({username: newUsername}, {where: {username}, limit: 1 } );
-            
-                return a[0] == 1;
-            } catch (error) {
-                console.error("Error changing username:", error);
+    }
+
+    /**
+* Change the user's username.
+* @param {String} username.
+* @param {String} newUsername  the new username.
+* @returns {Boolean} True if the first name was successfully changed, false otherwise.
+*/
+    static async changeUsername(username, newUsername) {
+        try {
+            if ((await this.isDeleted(username))) {
                 return false;
             }
+            let a = await User.update({ username: newUsername }, { where: { username }, limit: 1 });
+
+            return a[0] == 1;
+        } catch (error) {
+            console.error("Error changing username:", error);
+            return false;
         }
+    }
 
     /**
      * Change the user's password.
@@ -336,13 +336,13 @@ class Account {
      */
     static async changePassword(username, password) {
         try {
-     
-        if ( (await this.isDeleted(username)) ) {
-            return false;
-        }
-        let a = await User.update({password}, {where: {username}, limit: 1 } );
 
-        return a[0] == 1;
+            if ((await this.isDeleted(username))) {
+                return false;
+            }
+            let a = await User.update({ password }, { where: { username }, limit: 1 });
+
+            return a[0] == 1;
         } catch (error) {
             console.error("Error changing password:", error);
             return false;
@@ -353,78 +353,78 @@ class Account {
  * a more specilized virson of Accout that solly handes basic accounts
  */
 class Basic extends Account {
-      /**
- * Signs a user up
- * @param {String} username The username to sign up
- * @param {String} password The password to sign up
- * @param {String} email The email to sign up
- * @param {String} firstName The first name to sign up
- * @param {String} lastName The last name to sign up
- * @returns {Boolean} True if signed up and false otherwise
- */
-      static async signUp(username, password, email, firstName, lastName) {
+    /**
+* Signs a user up
+* @param {String} username The username to sign up
+* @param {String} password The password to sign up
+* @param {String} email The email to sign up
+* @param {String} firstName The first name to sign up
+* @param {String} lastName The last name to sign up
+* @returns {Boolean} True if signed up and false otherwise
+*/
+    static async signUp(username, password, email, firstName, lastName) {
         return (await Account.createSafely(username, password, email, "Basic", firstName, lastName)) != false;
     }
 
-        /**
-     * Logs a user in
-     * @param {String} username The username to log in
-     * @param {String} password The password to log in
-     * @returns {Boolean} True if logged in and false otherwise
-     */
-        static async login(username, password) {
-            if( (await this.isDeleted(username) ) ) return false;
+    /**
+ * Logs a user in
+ * @param {String} username The username to log in
+ * @param {String} password The password to log in
+ * @returns {Boolean} True if logged in and false otherwise
+ */
+    static async login(username, password) {
+        if ((await this.isDeleted(username))) return false;
 
-            let user = await User.findOne({ where: { username, type: "Basic"} });
+        let user = await User.findOne({ where: { username, type: "Basic" } });
 
-            return bcrypt.compareSync(password, user.password);
+        return bcrypt.compareSync(password, user.password);
 
 
-        }
+    }
 }
 
 /**
  * the admin class like the basic class create admin spicivic users
  */
 class Admin extends Account {
-        /**
- * Signs a user up
- * @param {String} username The username to sign up
- * @param {String} password The password to sign up
- * @param {String} email The email to sign up
- * @param {String} firstName The first name to sign up
- * @param {String} lastName The last name to sign up
- * @returns {Boolean} True if signed up and false otherwise
- */
-        static async signUp(username, password, email, firstName, lastName) {
-            return (await Account.createSafely(username, password, email, "Admin", firstName, lastName)) != false;
-        }
+    /**
+* Signs a user up
+* @param {String} username The username to sign up
+* @param {String} password The password to sign up
+* @param {String} email The email to sign up
+* @param {String} firstName The first name to sign up
+* @param {String} lastName The last name to sign up
+* @returns {Boolean} True if signed up and false otherwise
+*/
+    static async signUp(username, password, email, firstName, lastName) {
+        return (await Account.createSafely(username, password, email, "Admin", firstName, lastName)) != false;
+    }
 
-                /**
-     * Logs a user in
-     * @param {String} username The username to log in
-     * @param {String} password The password to log in
-     * @returns {Boolean} True if logged in and false otherwise
-     */
-                static async login(username, password) {
-                    if( (await this.isDeleted(username) ) ) return false;
-        
-                    let user = await User.findOne({ where: { username, type: "Admin"}});
-        
-                    return bcrypt.compareSync(password, user.password);
-        
-        
-                }
+    /**
+* Logs a user in
+* @param {String} username The username to log in
+* @param {String} password The password to log in
+* @returns {Boolean} True if logged in and false otherwise
+*/
+    static async login(username, password) {
+        if ((await this.isDeleted(username))) return false;
+
+        let user = await User.findOne({ where: { username, type: "Admin" } });
+
+        return bcrypt.compareSync(password, user.password);
+
+
+    }
 }
 
 
 (async () => {
     await sequelize.sync({ force: true });
 
-    with( Basic ){
+    with (Basic) {
         await signUp("a", "a", "a@a", "a", "a");
     }
-   
 
-    
+
+
 })()
