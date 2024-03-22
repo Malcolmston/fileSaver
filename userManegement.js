@@ -291,15 +291,15 @@ class Account {
 
      /**
      * Change the user's last name.
-     * @param {String} lasttName The new first name.
+     * @param {String} lastName The new first name.
      * @returns {Boolean} True if the first name was successfully changed, false otherwise.
      */
-     static async changeLastName(username, lasttName) {
+     static async changeLastName(username, lastName) {
         try {
             if ( (await this.isDeleted(username)) ) {
                 return false;
             }
-            let a = await User.update({lasttName}, {where: {username}, limit: 1 } );
+            let a = await User.update({lastName}, {where: {username}, limit: 1 } );
         
             return a[0] == 1;
         } catch (error) {
@@ -307,7 +307,27 @@ class Account {
             return false;
         }
     }   
-    
+  
+         /**
+     * Change the user's username.
+     * @param {String} username.
+     * @param {String} newUsername  the new username.
+     * @returns {Boolean} True if the first name was successfully changed, false otherwise.
+     */
+         static async changeUsername(username, newUsername) {
+            try {
+                if ( (await this.isDeleted(username)) ) {
+                    return false;
+                }
+                let a = await User.update({username: newUsername}, {where: {username}, limit: 1 } );
+            
+                return a[0] == 1;
+            } catch (error) {
+                console.error("Error changing username:", error);
+                return false;
+            }
+        }
+
     /**
      * Change the user's password.
      * @param {String} newPassword The new password.
