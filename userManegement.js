@@ -256,11 +256,9 @@ class Account {
          */
         static async restoreAccount(username) {
             try {
-                const user = await User.findOne({ where: { username }, paranoid: false });
-    
-                if (!user || !user.deletedAt) {
-                    return false;
-                }
+             if ( (await this.deleteAccount(username)) ) {
+                return false; // Account already exists
+            }
     
                 await user.restore();
 
@@ -271,7 +269,6 @@ class Account {
             }
         }
     
-
 }
 
 (async () => {
@@ -279,8 +276,7 @@ class Account {
 
     with( Account ){
         await createSafely("a", "a", "a@a");
-        console.log( (await deleteAccount("a") ) )
-        console.log( (await restoreAccount("a") ) )
+       // console.log( (await deleteAccount("a") ) )
 
     }
    
