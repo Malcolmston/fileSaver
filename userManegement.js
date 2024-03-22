@@ -335,18 +335,13 @@ class Account {
      */
     static async changePassword(username, password) {
         try {
-            if (newPassword === null || newPassword === undefined) {
-                return false;
-            }
+     
+        if ( (await this.isDeleted(username)) ) {
+            return false;
+        }
+        let a = await User.update({password}, {where: {username}, limit: 1 } );
 
-            if ( (await this.isDeleted(username)) ) {
-                return false;
-            }
-
-
-            let a = await User.update({password}, {where: {username}, limit: 1 } );
-        
-            return a[0] == 1;
+        return a[0] == 1;
         } catch (error) {
             console.error("Error changing password:", error);
             return false;
@@ -360,7 +355,7 @@ class Account {
     with( Account ){
         await createSafely("a", "a", "a@a");
        // console.log( (await deleteAccount("a") ) )
-        console.log( (await changeFirstName("a", "aaa") ) )
+        console.log( (await changePassword("a", "b") ) )
 
     }
    
