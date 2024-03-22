@@ -233,17 +233,40 @@ class Account {
 
         /**
      * Softly delete the account.
+     * @param {String} username the users username 
      * @returns {Boolean} True if the account was deleted, false otherwise.
      */
        static async deleteAccount(username) {
             try {
                 if( await this.isDeleted(username) ) return false;
     
-                await user.destroy();
+                await User.destroy({where: {username}});
 
                 return true;
             } catch (error) {
                 console.error("Error deleting account:", error);
+                return false;
+            }
+        }
+
+        /**
+         * restores softly deleted accounts 
+         * @param {String} username the users username 
+         * @returns 
+         */
+        static async restoreAccount(username) {
+            try {
+                const user = await User.findOne({ where: { username }, paranoid: false });
+    
+                if (!user || !user.deletedAt) {
+                    return false;
+                }
+    
+                await user.restore();
+
+                return true;
+            } catch (error) {
+                console.error("Error restoring account:", error);
                 return false;
             }
         }
@@ -257,6 +280,8 @@ class Account {
     with( Account ){
         await createSafely("a", "a", "a@a");
         console.log( (await deleteAccount("a") ) )
+        console.log( (await restoreAccount("a") ) )
+
     }
    
 
