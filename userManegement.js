@@ -375,7 +375,7 @@ class Basic extends Account {
         static async login(username, password) {
             if( (await this.isDeleted(username) ) ) return false;
 
-            let user = await User.findOne({ where: { username } });
+            let user = await User.findOne({ where: { username, type: "Basic"} });
 
             return bcrypt.compareSync(password, user.password);
 
