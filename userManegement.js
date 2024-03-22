@@ -22,6 +22,7 @@ const sequelize = new Sequelize({
 const byteSize = require('byte-size')
 const bcrypt = require("bcrypt");
 const fs = require('fs');
+const console = require('console');
 
 
 (async () => {
@@ -364,16 +365,29 @@ class Basic extends Account {
       static async signUp(username, password, email, firstName, lastName) {
         return (await Account.createSafely(username, password, email, "Basic", firstName, lastName)) != false;
     }
+
+        /**
+     * Logs a user in
+     * @param {String} username The username to log in
+     * @param {String} password The password to log in
+     * @returns {Boolean} True if logged in and false otherwise
+     */
+        static async login(username, password) {
+            if( (await this.isDeleted(username) ) ) return false;
+
+            let user = await User.findOne({ where: { username } });
+
+            return bcrypt.compareSync(password, user.password);
+
+
+        }
 }
 
 (async () => {
     await sequelize.sync({ force: true });
 
-    with( Account ){
-        await createSafely("a", "a", "a@a");
-       // console.log( (await deleteAccount("a") ) )
-        console.log( (await changePassword("a", "b") ) )
-
+    with( Basic ){
+        await signUp("a", "a", "a@a", "a", "a");
     }
    
 
