@@ -303,7 +303,7 @@ class Account {
         
             return a[0] == 1;
         } catch (error) {
-            console.error("Error changing first name:", error);
+            console.error("Error changing last name:", error);
             return false;
         }
     }   
