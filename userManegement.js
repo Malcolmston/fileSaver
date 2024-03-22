@@ -269,6 +269,28 @@ class Account {
             }
         }
     
+    /**
+     * Change the user's password.
+     * @param {String} newPassword The new password.
+     * @returns {Boolean} True if the password was successfully changed, false otherwise.
+     */
+    static async changePassword(username, newPassword) {
+        try {
+            if (newPassword === null || newPassword === undefined) {
+                return false;
+            }
+
+            if ( (await this.deleteAccount(username)) ) {
+                return false; // Account already exists
+            }
+
+            await user.update({ password: newPassword }, {where:{username}});
+            return true;
+        } catch (error) {
+            console.error("Error changing password:", error);
+            return false;
+        }
+    }
 }
 
 (async () => {
@@ -277,6 +299,7 @@ class Account {
     with( Account ){
         await createSafely("a", "a", "a@a");
        // console.log( (await deleteAccount("a") ) )
+        console.log( (await changePassword("a", "aa") ) )
 
     }
    
