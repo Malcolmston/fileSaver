@@ -171,6 +171,23 @@ class Account {
         }
     }
 
+        /**
+     * Check if the account has been deleted.
+     * @param {String} username account username
+     * @returns {Boolean} True if the account has been deleted, false otherwise.
+     */
+        static async isDeleted(username) {
+            try {
+                if( await this.userExists(username) ) return false;
+                
+                let user = await User.findOne({ where: { username, deletedAt: {[Op.ne]: [null]} } });
+                return user != null;
+            } catch (error) {
+                console.error("Error checking if account is deleted:", error);
+                return false;
+            }
+        }
+
     /**
  * Create a new account if it does not already exist.
  * @param {String} username The username of the account to create/look at
