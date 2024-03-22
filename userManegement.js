@@ -272,7 +272,7 @@ class Account {
     
     /**
      * Change the user's first name.
-     * @param {String} newFirstName The new first name.
+     * @param {String} firstName The new first name.
      * @returns {Boolean} True if the first name was successfully changed, false otherwise.
      */
     static async changeFirstName(username, firstName) {
