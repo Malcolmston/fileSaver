@@ -179,7 +179,7 @@ class Account {
         static async isDeleted(username) {
             try {
                 if( await this.userExists(username) ) return false;
-                
+
                 let user = await User.findOne({ where: { username, deletedAt: {[Op.ne]: [null]} } });
                 return user != null;
             } catch (error) {
@@ -206,7 +206,7 @@ class Account {
                 return false; // Account already exists
             }
 
-            user = await User.create({ username, password, type, firstName, lastName, email });
+            let user = await User.create({ username, password, type, firstName, lastName, email });
 
             return user.toJSON();
         } catch (error) {
@@ -231,12 +231,38 @@ class Account {
     }
 
 
+        /**
+     * Softly delete the account.
+     * @returns {Boolean} True if the account was deleted, false otherwise.
+     */
+       static async deleteAccount(username) {
+            try {
+                const user = await User.findOne({ where: { username }, paranoid: false });
+    
+                if (!user) {
+                    return false;
+                }
+    
+                await user.destroy();
+
+                return true;
+            } catch (error) {
+                console.error("Error deleting account:", error);
+                return false;
+            }
+        }
+    
+
 }
 
 (async () => {
     await sequelize.sync({ force: true });
 
-    console.log(
-        await Account.createSafely("a", "a", "a@a")
-    );
+    with( Account ){
+        await createSafely("a", "a", "a@a");
+        console.log( (await deleteAccount("a") ) )
+    }
+   
+
+    
 })()
