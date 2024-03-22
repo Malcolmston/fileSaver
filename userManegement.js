@@ -183,9 +183,9 @@ class Account {
  */
     static async createSafely(username, password, email, type = "Basic", firstName = null, lastName = null) {
         try {
-            let user = await User.findOne({ where: { username } });
+            
 
-            if (user) {
+            if ( (await this.userExists(username)) ) {
                 return false; // Account already exists
             }
 
