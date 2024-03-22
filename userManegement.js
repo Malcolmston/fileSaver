@@ -352,7 +352,18 @@ class Account {
  * a more specilized virson of Accout that solly handes basic accounts
  */
 class Basic extends Account {
-
+      /**
+ * Signs a user up
+ * @param {String} username The username to sign up
+ * @param {String} password The password to sign up
+ * @param {String} email The email to sign up
+ * @param {String} firstName The first name to sign up
+ * @param {String} lastName The last name to sign up
+ * @returns {Boolean} True if signed up and false otherwise
+ */
+      static async signUp(username, password, email, firstName, lastName) {
+        return (await Account.createSafely(username, password, email, "Basic", firstName, lastName)) != false;
+    }
 }
 
 (async () => {
