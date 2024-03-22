@@ -289,6 +289,24 @@ class Account {
         }
     }
 
+     /**
+     * Change the user's last name.
+     * @param {String} lasttName The new first name.
+     * @returns {Boolean} True if the first name was successfully changed, false otherwise.
+     */
+     static async changeLastName(username, lasttName) {
+        try {
+            if ( (await this.isDeleted(username)) ) {
+                return false;
+            }
+            let a = await User.update({lasttName}, {where: {username}, limit: 1 } );
+        
+            return a[0] == 1;
+        } catch (error) {
+            console.error("Error changing first name:", error);
+            return false;
+        }
+    }   
     
     /**
      * Change the user's password.
