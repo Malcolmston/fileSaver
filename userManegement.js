@@ -268,26 +268,47 @@ class Account {
                 return false;
             }
         }
+
+    
+    /**
+     * Change the user's first name.
+     * @param {String} newFirstName The new first name.
+     * @returns {Boolean} True if the first name was successfully changed, false otherwise.
+     */
+    static async changeFirstName(username, firstName) {
+        try {
+            if ( (await this.isDeleted(username)) ) {
+                return false;
+            }
+            let a = await User.update({firstName}, {where: {username}, limit: 1 } );
+        
+            return a[0] == 1;
+        } catch (error) {
+            console.error("Error changing first name:", error);
+            return false;
+        }
+    }
+
     
     /**
      * Change the user's password.
      * @param {String} newPassword The new password.
      * @returns {Boolean} True if the password was successfully changed, false otherwise.
      */
-    static async changePassword(username, newPassword) {
+    static async changePassword(username, password) {
         try {
             if (newPassword === null || newPassword === undefined) {
                 return false;
             }
 
-            if ( !(await this.deleteAccount(username)) ) {
+            if ( (await this.isDeleted(username)) ) {
                 return false;
             }
 
 
-            await User.update({ password: newPassword }, {where:{username}})
-
-            return true;
+            let a = await User.update({password}, {where: {username}, limit: 1 } );
+        
+            return a[0] == 1;
         } catch (error) {
             console.error("Error changing password:", error);
             return false;
@@ -301,7 +322,7 @@ class Account {
     with( Account ){
         await createSafely("a", "a", "a@a");
        // console.log( (await deleteAccount("a") ) )
-        console.log( (await changePassword("a", "aaa") ) )
+        console.log( (await changeFirstName("a", "aaa") ) )
 
     }
    
