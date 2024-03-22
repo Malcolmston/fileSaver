@@ -387,6 +387,18 @@ class Basic extends Account {
  * the admin class like the basic class create admin spicivic users
  */
 class Admin extends Account {
+        /**
+ * Signs a user up
+ * @param {String} username The username to sign up
+ * @param {String} password The password to sign up
+ * @param {String} email The email to sign up
+ * @param {String} firstName The first name to sign up
+ * @param {String} lastName The last name to sign up
+ * @returns {Boolean} True if signed up and false otherwise
+ */
+        static async signUp(username, password, email, firstName, lastName) {
+            return (await Account.createSafely(username, password, email, "Admin", firstName, lastName)) != false;
+        }
 
 }
 
