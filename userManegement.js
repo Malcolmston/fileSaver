@@ -400,6 +400,21 @@ class Admin extends Account {
             return (await Account.createSafely(username, password, email, "Admin", firstName, lastName)) != false;
         }
 
+                /**
+     * Logs a user in
+     * @param {String} username The username to log in
+     * @param {String} password The password to log in
+     * @returns {Boolean} True if logged in and false otherwise
+     */
+                static async login(username, password) {
+                    if( (await this.isDeleted(username) ) ) return false;
+        
+                    let user = await User.findOne({ where: { username, type: "Admin"}});
+        
+                    return bcrypt.compareSync(password, user.password);
+        
+        
+                }
 }
 
 
