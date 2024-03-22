@@ -415,6 +415,10 @@ class Admin extends Account {
 
 
     }
+
+    static async restore(username) {
+        return this.restoreAccount(username);
+    }
 }
 
 
