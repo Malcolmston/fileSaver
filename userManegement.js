@@ -202,7 +202,7 @@ class Account {
         try {
             
 
-            if ( (await this.userExists(username)) ) {
+            if ( (await this.deleteAccount(username)) ) {
                 return false; // Account already exists
             }
 
