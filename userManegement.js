@@ -237,11 +237,7 @@ class Account {
      */
        static async deleteAccount(username) {
             try {
-                const user = await User.findOne({ where: { username }, paranoid: false });
-    
-                if (!user) {
-                    return false;
-                }
+                if( await this.isDeleted(username) ) return false;
     
                 await user.destroy();
 
