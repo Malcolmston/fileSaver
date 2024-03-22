@@ -202,7 +202,7 @@ class Account {
         try {
             
 
-            if ( (await this.deleteAccount(username)) ) {
+            if ( !(await this.deleteAccount(username)) ) {
                 return false; // Account already exists
             }
 
@@ -280,11 +280,13 @@ class Account {
                 return false;
             }
 
-            if ( (await this.deleteAccount(username)) ) {
-                return false; // Account already exists
+            if ( !(await this.deleteAccount(username)) ) {
+                return false;
             }
 
-            await user.update({ password: newPassword }, {where:{username}});
+
+            await User.update({ password: newPassword }, {where:{username}})
+
             return true;
         } catch (error) {
             console.error("Error changing password:", error);
@@ -299,7 +301,7 @@ class Account {
     with( Account ){
         await createSafely("a", "a", "a@a");
        // console.log( (await deleteAccount("a") ) )
-        console.log( (await changePassword("a", "aa") ) )
+        console.log( (await changePassword("a", "aaa") ) )
 
     }
    
