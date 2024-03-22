@@ -348,6 +348,12 @@ class Account {
         }
     }
 }
+/**
+ * a more specilized virson of Accout that solly handes basic accounts
+ */
+class Basic extends Account {
+
+}
 
 (async () => {
     await sequelize.sync({ force: true });
