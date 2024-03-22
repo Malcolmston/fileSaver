@@ -383,6 +383,14 @@ class Basic extends Account {
         }
 }
 
+/**
+ * the admin class like the basic class create admin spicivic users
+ */
+class Admin extends Account {
+
+}
+
+
 (async () => {
     await sequelize.sync({ force: true });
 
