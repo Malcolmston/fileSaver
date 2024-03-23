@@ -109,6 +109,22 @@ const User = sequelize.define("user", {
     username: {
         type: DataTypes.TEXT,
         unique: true,
+
+        validate: {
+            isValid: function(value) {
+                let type = this.getDataValue("type");
+
+                if( type === "Basic"){
+                    
+                } else if( type === "Admin" ){
+                    let reg = /\w{7,}\d{0,4}/g
+
+                    if( !reg.test(value) ) {
+                        throw new Error("A admin username must have atlest 7 letters and can have up to 4 numbers")
+                    }
+                }
+            }
+        }
     },
 
     password: {
@@ -426,9 +442,13 @@ class Admin extends Account {
     await sequelize.sync({ force: true });
 
     with (Basic) {
-        await signUp("a", "a", "a@a", "a", "a");
-    }
+        await signUp("a", "a", "a@a", "a", "a")
+        await signUp("b", "b", "b@b", "b", "b")
+        }
 
+        with(Admin) {
+            await Admin.signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
+        }
 
 
 })()
