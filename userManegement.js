@@ -453,6 +453,22 @@ class Log {
     }
 }
 
+/**
+ * a class dedicated to handing files for users
+*/
+class File extends Basic {
+    constructor(username) {
+        super();
+
+
+        File.isValid(username).then(function(bool) {
+            if(!bool)  throw new Error("the given account can not modify files")
+        })
+
+        this.username = username;
+    }
+}
+
 
 (async () => {
     await sequelize.sync({ force: true });
@@ -462,9 +478,13 @@ class Log {
         await signUp("b", "b", "b@b", "b", "b")
         }
 
-        with(Admin) {
-            await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
-        }
+    with(Admin) {
+        await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
+    }
+
+    console.log( new File("c") );
+    
+    
 
 
 })()
