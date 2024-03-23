@@ -467,6 +467,21 @@ class File extends Basic {
 
         this.username = username;
     }
+
+    /**
+     * checks if a accont is valid and basic 
+     * @param {String} username the username of the user to access
+     * @returns {Boolean} true if the user is authorized to have files and false otherwise
+     */
+    static async isValid (username) {
+        if ( (await super.isDeleted(username) ) ) return false; // checks if the user exists
+        else if( !(await User.findOne({where: {username, type:"Basic"}}) ) ) return false; // check if user is Basic
+
+        return true;
+    }
+
+
+
 }
 
 
