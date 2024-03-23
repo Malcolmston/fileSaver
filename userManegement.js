@@ -480,7 +480,44 @@ class File extends Basic {
         return true;
     }
 
+/**
+ * this function creates file for users.
+ * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
+ * @param {String} mimetype the files minetype
+ * @param {integer} size the size of a file
+ * @param {String} originalname the original name of the file to be created
+ * @param {String | null} name either the original name of the file or a custum alias for the file
+ * @param {Blob} data the file as a blob to be added to the array
+ * @returns {Boolean} true if the file was added successfully;
+ */
+    async fileCreate(encoding, mimetype, size, originalname, name = null, data) {
+        let username = this.username;
 
+        try {
+            if( (await super.isDeleted(username) )) return false;
+
+            // Count files with the same originalname prefix
+            let count = await this.countFiles({ username, fileName: originalname });
+
+            // Create file entry
+            let f;
+            try {
+                f = await Files.create({ encoding, mimetype, size, originalname, name, data });
+            } catch (e) {
+                // Retry with adjusted originalname if creation fails
+                f = await Files.create({ encoding, mimetype, size, originalname: originalname + '-' + count, name, data });
+            }
+            let u = await User.findOne({where:{username}});
+
+           
+            await f.setUser(u)
+
+            return true;
+        } catch (error) {
+            console.error('Error in fileCreate:', error);
+            return false; // Return null on error
+        }
+    }
 
 }
 
