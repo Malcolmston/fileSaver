@@ -438,6 +438,22 @@ class Admin extends Account {
 }
 
 
+/**
+ * creates the logger class 
+ */
+class Log {
+    static async createMessage(message, userId) {
+        if (userId == null) return;
+        return await Logger.create({
+            message: message,
+            userId: userId,
+
+
+        })
+    }
+}
+
+
 (async () => {
     await sequelize.sync({ force: true });
 
@@ -447,7 +463,7 @@ class Admin extends Account {
         }
 
         with(Admin) {
-            await Admin.signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
+            await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
         }
 
 
