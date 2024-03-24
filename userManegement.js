@@ -45,18 +45,18 @@ const Files = sequelize.define("files", {
 
     encoding: {
         type: DataTypes.TEXT,
-        isNull: false,
+        allowNull: false,
     },
 
 
     mimetype: {
         type: DataTypes.TEXT,
-        isNull: false,
+        allowNull: false,
     },
 
     size: {
         type: DataTypes.NUMBER,
-        isNull: false,
+        allowNull: false,
         get() {
             let size = this.getDataValue('size');
 
@@ -69,20 +69,6 @@ const Files = sequelize.define("files", {
     originalname: {
         type: DataTypes.TEXT,
         allowNull: false,
-
-        set: async function(value){
-            let {count} = await Files.findAndCountAll({
-                where: {originalname: "%"+value }
-            })
-
-            if( count >= 1 ){
-                this.setDataValue("originalname",  value + '-' +  count );
-            } else {
-                this.setDataValue("originalname", value );
-
-            }
-
-        }
     },
 
     name: {
@@ -516,7 +502,7 @@ class File extends Basic {
             // Create file entry
             let f;
             if( count > 0 ) {
-                f = await Files.create({ encoding, mimetype, size, originalname, name, data });
+                f = await Files.create({ encoding, mimetype, size, originalname: originalname+"-"+ coutn, name, data });
             } else {
                 f = await Files.create({ encoding, mimetype, size, originalname, name, data });
             }
