@@ -50,6 +50,8 @@ app.get("/api/v1/myFiles", async (req, res) => {
     }
 })
 
+
+
 app.post("/login",async (req, res) => {
     let { username, password } = req.body
   
@@ -66,7 +68,7 @@ app.post("/login",async (req, res) => {
     }
   })
 
-  app.post("/signup", async (req, res) => {
+app.post("/signup", async (req, res) => {
     let { fname, lname, username, password, email } = req.body
   
     let a = await Basic.signUp(username, password, email, fname, lname);
@@ -81,6 +83,77 @@ app.post("/login",async (req, res) => {
       res.render('home', { message: "sign up failed" });
     }
   });
+
+app.post('/fileupload', upload.array('file', 100), async (req, res) => {
+    let username = req.session.username
+
+    if(!username ){
+        res.status(403).json({message: "you must log in inorder to user this feture", ok: false});
+    }
+
+    try {
+    const file = new File(username);
+    let ans = true;
+
+
+    for (let file of req.files) {
+        let { encoding, mimetype, size, originalname } = file;
+        let fileData;
+
+        if (Object.keys(file).includes("buffer")) {
+    
+            fileData = {
+              username,
+              encoding,
+              mimetype,
+              size,
+              originalname,
+              data: file.buffer // Store file buffer directly
+            };
+    
+        } else {
+            let path = file.path;
+            let fileBuffer = fs.readFileSync(path);
+    
+            // Delete the temporary file
+            fs.unlinkSync(path);
+    
+            fileData = {
+              username,
+              encoding,
+              mimetype,
+              size,
+              originalname,
+              data: fileBuffer // Store file buffer directly
+            };
+          }
+
+        let r = await file.fileCreate(fileData);
+
+        if (!r) {
+            ans = false;
+            break;
+          } else {
+            continue;
+          }
+
+    }
+
+    if (ans) {
+        console.log("valid")
+  
+        res.status(200).redirect('/login');
+    } else {
+  
+        res.status(402).render('basic', { username, message: `Error uploading a file` });
+      }
+    } catch (e) {
+        console.error(e);
+        res.status(500).render('basic', { username, message: 'Error uploading file.' });
+    }
+
+});
+
 
 
 app.listen(PORT, HOST);
