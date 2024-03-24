@@ -93,26 +93,21 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
         res.status(403).json({message: "you must log in inorder to user this feture", ok: false});
     }
 
+
     try {
-    const file = new File(username);
+        const file_class = new File(username);
+
     let ans = true;
 
 
     for (let file of req.files) {
         let { encoding, mimetype, size, originalname } = file;
-        let fileData;
 
+        let f_blob;
         if (Object.keys(file).includes("buffer")) {
-    
-            fileData = {
-              username,
-              encoding,
-              mimetype,
-              size,
-              originalname,
-              data: file.buffer // Store file buffer directly
-            };
-    
+
+            f_blob =  file.buffer
+
         } else {
             let path = file.path;
             let fileBuffer = fs.readFileSync(path);
@@ -120,17 +115,11 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
             // Delete the temporary file
             fs.unlinkSync(path);
     
-            fileData = {
-              username,
-              encoding,
-              mimetype,
-              size,
-              originalname,
-              data: fileBuffer // Store file buffer directly
-            };
+            f_blob =  fileBuffer
           }
 
-        let r = await file.fileCreate(fileData);
+        let r = await file_class.fileCreate(encoding, mimetype, size, originalname, f_blob);
+
 
         if (!r) {
             ans = false;
@@ -141,9 +130,7 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
 
     }
 
-    if (ans) {
-        console.log("valid")
-  
+    if (ans) {  
         res.status(200).redirect('/login');
     } else {
   
