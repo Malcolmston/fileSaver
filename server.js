@@ -51,5 +51,22 @@ app.post("/login",async (req, res) => {
     }
   })
 
+  app.post("/signup", async (req, res) => {
+    let { fname, lname, username, password, email } = req.body
+  
+    let a = await Basic.signUp(username, password, email, fname, lname);
+  
+    if (a) {
+      req.session.valid = true
+      req.session.username = username
+      req.session.isAdmin = false;
+  
+      res.render('basic', { username, message: ""});
+    } else {
+      res.render('home', { message: "sign up failed" });
+    }
+  });
+
+
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
