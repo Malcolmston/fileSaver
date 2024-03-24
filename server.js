@@ -152,7 +152,7 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
 
 });
 
-app.put("/fname", async (req, res) => {
+app.put("/change/fname", async (req, res) => {
     let username = req.session.username
     let fname = req.body.fname;
 
