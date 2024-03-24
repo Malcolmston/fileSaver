@@ -1,4 +1,4 @@
-const formData = new FormData();
+let formData = new FormData();
 const toast_message = {
   Toast: Swal.mixin({
     toast: true,
