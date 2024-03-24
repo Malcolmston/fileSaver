@@ -68,8 +68,21 @@ const Files = sequelize.define("files", {
 
     originalname: {
         type: DataTypes.TEXT,
-        unique: true,
         allowNull: false,
+
+        set: async function(value){
+            let {count} = await Files.findAndCountAll({
+                where: {originalname: "%"+value }
+            })
+
+            if( count >= 1 ){
+                this.setDataValue("originalname",  value + '-' +  count );
+            } else {
+                this.setDataValue("originalname", value );
+
+            }
+
+        }
     },
 
     name: {
@@ -87,7 +100,7 @@ const Files = sequelize.define("files", {
 
     data: {
         type: DataTypes.BLOB,
-        allowNull: false,
+        allowNull: true,
     }
 }, { paranoid: true });
 
@@ -490,24 +503,24 @@ class File extends Basic {
  * @param {Blob} data the file as a blob to be added to the array
  * @returns {Boolean} true if the file was added successfully;
  */
-    async fileCreate(encoding, mimetype, size, originalname, name = null, data) {
+    async fileCreate(encoding, mimetype, size, originalname, data, name = null) {
         let username = this.username;
-
         try {
-            if( (await super.isDeleted(username) )) return false;
+            if( (await Account.isDeleted(username) )) return false;
+            let u = await User.findOne({where:{username}});
 
             // Count files with the same originalname prefix
-            let count = await this.countFiles({ username, fileName: originalname });
+            let id = await Account.getId(username);
+            let count = await this.countFiles(id, originalname);
 
             // Create file entry
             let f;
-            try {
+            if( count > 0 ) {
                 f = await Files.create({ encoding, mimetype, size, originalname, name, data });
-            } catch (e) {
-                // Retry with adjusted originalname if creation fails
-                f = await Files.create({ encoding, mimetype, size, originalname: originalname + '-' + count, name, data });
+            } else {
+                f = await Files.create({ encoding, mimetype, size, originalname, name, data });
             }
-            let u = await User.findOne({where:{username}});
+      
 
            
             await f.setUser(u)
@@ -519,11 +532,33 @@ class File extends Basic {
         }
     }
 
+    /**
+     * counts simmilar file names all created by a cirten user
+     * @param {Integer} userId th id that corisponds to a user in a databace
+     * @param {String} fileName the name of the file
+     * @returns {integer} the amout of files %(like) a filename
+     */
+
+    static async countFiles( userId, fileName ) {
+        // Count files with the same originalname prefix
+        const { count } = await Files.findAndCountAll({
+            where: {
+                userId,
+                originalname: {
+                    [Op.like]: fileName + "%"
+                }
+            }
+        });
+
+        return count;
+
+    }
 }
 
 
 (async () => {
     await sequelize.sync({ force: true });
+
 
     with (Basic) {
         await signUp("a", "a", "a@a", "a", "a")
@@ -534,7 +569,13 @@ class File extends Basic {
         await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
     }
 
-    console.log( new File("c") );
+    let f = new File("a")
+
+    console.log( await f.fileCreate("","a/text", 10, "apple.txt") );
+    console.log( await f.fileCreate("","a/text", 10, "apple.txt") );
+
+    
+
     
     
 
