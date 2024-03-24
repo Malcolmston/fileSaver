@@ -225,6 +225,29 @@ app.put("/change/username", async (req, res) => {
     }
 })
 
+app.put("/change/password", async (req, res) => {
+    let username = req.session.username
+    let new_password = req.body.new_password;
+
+    if(!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if(!new_password) res.status(400).json({ message: "please enter a new password", ok: false });
+
+
+    with(Basic){
+        try{
+            let ret = await changeUsername(username, new_username);
+            if( ret){
+                res.status(200).json({ message: "last password changed", ok: true});
+            } else {
+                res.status(400).json( { message: 'Error changing password', ok: false });
+            }
+        } catch(e){
+            console.error( e );
+            res.status(500).json('basic', { message: 'Error '+e, ok: false });
+
+        }
+    }
+})
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
