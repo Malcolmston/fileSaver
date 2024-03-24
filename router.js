@@ -8,7 +8,7 @@ const session = require('express-session')
 
 const {SECRET} =  process.env;
 
-const sessionMiddleware = session({
+exports.sessionMiddleware = session({
     secret: SECRET,
     resave: true,
     saveUninitialized: true,
