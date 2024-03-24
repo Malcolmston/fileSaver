@@ -1,0 +1,30 @@
+#drop_zone {
+    width: 100%;
+    height: 80px;
+    
+    border: 1px dashed black;
+}
+
+
+label {
+      pointer-events: none;
+
+    }
+
+#prevew {
+  width: auto;
+  
+  height: 200px;
+  
+  overflow-y: scroll;
+  overflow-x: dashed;
+}
+
+img {
+  margin-left: 5px;
+  width: 40px;
+  height: 40px;
+  
+  border: 1px soft-light black;
+}
+
