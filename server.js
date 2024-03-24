@@ -38,13 +38,23 @@ app.get("/", async (req, res) => {
   })
 
 app.get("/api/v1/myFiles", async (req, res) => {
-    let {username} = req.query
+    let {username, json} = req.query
    if(!username) return;
+ 
+   const file = (new File(username));
+
+   json = (json ?  true: false)
 
    try {
-    const file = new File(username);
-    res.status(200).json( (await file.getAllFiles(username)) );
-    
+
+    let files = JSON.stringify( (await file.getAllFiles(username)) )
+
+    if( json ){
+        res.json({files})
+    } else {
+        res.render("./basic_tabs/fileHandle", { files})
+    }
+
 
     } catch(e) {
         console.error( e )
