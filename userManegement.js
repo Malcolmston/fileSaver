@@ -502,7 +502,7 @@ class File extends Basic {
             // Create file entry
             let f;
             if( count > 0 ) {
-                f = await Files.create({ encoding, mimetype, size, originalname: originalname+"-"+ coutn, name, data });
+                f = await Files.create({ encoding, mimetype, size, originalname: originalname+"-"+ count, name, data });
             } else {
                 f = await Files.create({ encoding, mimetype, size, originalname, name, data });
             }
@@ -567,3 +567,8 @@ class File extends Basic {
 
 
 })()
+
+
+module.exports = {
+    Basic, Admin, File
+}
