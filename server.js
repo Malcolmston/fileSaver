@@ -2,6 +2,7 @@ require('dotenv').config() // adds the ability to create environment variables
 
 const express = require('express');
 const multer = require('multer');
+const {sessionMiddleware} = require('./router.js')
 
 const app = express();
 
@@ -16,8 +17,6 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 app.set('view engine', 'ejs');
 app.use(express.static('scripts'))
 app.use(express.static('styles'))
-
-
 app.use(sessionMiddleware);
 
 app.listen(PORT, HOST);
