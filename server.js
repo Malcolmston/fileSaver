@@ -7,3 +7,6 @@ const app = express();
 
 
 const {PORT,HOST} = process.env;
+
+app.listen(PORT, HOST);
+console.log(`Running on http://${HOST}:${PORT}`);
