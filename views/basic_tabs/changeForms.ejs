@@ -66,3 +66,72 @@
       </form>
 </body>
 </html>
+
+<script>
+
+
+const form_login = document.querySelector('#form_login');
+
+let fm1 = document.querySelector('#form_1'),
+    fm2 = document.querySelector('#form_2'),
+    //fm3 = document.querySelector('#form_3'),
+    fm3 = document.querySelector('#form_3'),
+    fm4 = document.querySelector('#form_4');
+
+
+const forms = [{ form: fm1, req: "fname" }, { form: fm2, req: "lname" }, { form: fm3, req: "username" }, { form: fm4, req: "password" } ];
+
+
+
+forms.forEach((box) => {
+    let req = box.req;
+    let form = box.form;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        var o = {};
+        new FormData(form).forEach((value, key) => (o[key] = value));
+    
+            fetch(`/change/${req}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(o),
+            })
+                .then((raw) => raw.json())
+                .then((data) => {
+                    if (!data.ok) {
+                        toast_message.error(data.message);
+                    } else {
+                        toast_message.success(data.message);
+                    }
+                })
+                .catch((err) => console.log(err));
+    });
+
+});
+// Enable form validation
+(function () {
+    'use strict';
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation');
+
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+
+
+
+
+</script>
