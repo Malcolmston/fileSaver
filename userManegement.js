@@ -539,7 +539,7 @@ class File extends Basic {
      * @returns {integer} the amout of files %(like) a filename
      */
 
-    static async countFiles( userId, fileName ) {
+    async countFiles( userId, fileName ) {
         // Count files with the same originalname prefix
         const { count } = await Files.findAndCountAll({
             where: {
