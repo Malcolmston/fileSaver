@@ -152,6 +152,56 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
 
 });
 
+app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
+    let { username} = req.body
+    let file = req.file;
+
+    if (!username) {
+        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    }
+
+    if( !file ){
+        res.status(400).json({ message: "you must submit a file", ok: false });
+    }
+
+
+    try {
+        const file_class = new File(username);
+
+        let { encoding, mimetype, size, originalname } = file;
+
+        let f_blob;
+        if (Object.keys(file).includes("buffer")) {
+
+            f_blob = file.buffer
+
+        } else {
+            let path = file.path;
+            let fileBuffer = fs.readFileSync(path);
+
+            // Delete the temporary file
+            fs.unlinkSync(path);
+
+            f_blob = fileBuffer
+        }
+
+        let r = await file_class.fileCreate(encoding, mimetype, size, originalname, f_blob);
+
+
+        if (!r) {
+            res.status(402).render('basic', { username, message: `Error uploading a file` });
+        } else {
+            res.status(200).redirect('/login');
+        }
+
+        
+    } catch (e) {
+        console.error(e);
+        res.status(500).render('basic', { username, message: 'Error uploading file.' });
+    }
+
+});
+
 app.put("/change/fname", async (req, res) => {
     let username = req.session.username
     let fname = req.body.fname;
