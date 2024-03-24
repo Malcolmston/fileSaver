@@ -20,7 +20,7 @@ app.use(express.static('scripts'))
 app.use(express.static('styles'))
 app.use(sessionMiddleware);
 
-app.get("/", async (req, res, next) => {
+app.get("/", async (req, res) => {
     const { valid, username, isAdmin } = req.session
     if (isAdmin && valid) {
       let data = await Admin.getAll(username);
@@ -35,6 +35,21 @@ app.get("/", async (req, res, next) => {
   
   })
 
+app.post("/login",async (req, res) => {
+    let { username, password } = req.body
+  
+    let a = await Basic.login(username, password);
+
+    if (a) {
+        req.session.valid = true
+        req.session.username = username
+        req.session.isAdmin = false;
+
+        res.render('basic', { username, message: "" });
+    } else {
+        res.render('home', { message: "login failed" });
+    }
+  })
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
