@@ -177,6 +177,30 @@ app.put("/change/fname", async (req, res) => {
 })
 
 
+app.put("/change/lname", async (req, res) => {
+    let username = req.session.username
+    let lname = req.body.lname;
+
+    if(!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if(!lname) res.status(400).json({ message: "please enter a last name", ok: false });
+
+
+    with(Basic){
+        try{
+            let ret = await changeLastName(username, lname);
+            if( ret){
+                res.status(200).json({ message: "last name changed", ok: true});
+            } else {
+                res.status(400).json( { message: 'Error changing name', ok: false });
+            }
+        } catch(e){
+            console.error( e );
+            res.status(500).json('basic', { message: 'Error '+e, ok: false });
+
+        }
+    }
+})
+
 
 
 app.listen(PORT, HOST);
