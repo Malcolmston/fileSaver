@@ -186,7 +186,7 @@ const Files = sequelize.define("files", {
 
     data: {
         type: DataTypes.BLOB,
-        allowNull: true,
+        allowNull: false,
     }
 }, { paranoid: true });
 
@@ -684,12 +684,6 @@ class File extends Basic {
         await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
     }
 
-    let f = new File("a")
-
-    console.log( await f.fileCreate("","a/text", 10, "apple.txt") );
-    console.log( await f.fileCreate("","a/text", 10, "apple.txt") );
-
-    
 
     
     
