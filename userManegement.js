@@ -539,6 +539,35 @@ class File extends Basic {
         return count;
 
     }
+
+    /**
+     * gets a list of all the files from a user
+     * @param {String} username the username of the account to get information
+     * @returns {ArrayList<JSON>} returns a list of the found file
+     */
+    async getAllFiles (username) {
+        let userId = await this.getUser(username);
+
+
+        let files = await Files.findAll({
+            where: { userId },
+            attributes: { exclude: ['encoding', 'userId', 'data'] },
+            raw: true
+        });
+        //let c = byteSize(size)
+        // return  c.value + c.unit
+
+        return files.map((json) => {
+            let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
+
+
+            let c = byteSize(size);
+
+
+            return { id, mimetype: icon(mimetype.split("/")[1]), size: c.value + c.unit, originalname, name, createdAt, updatedAt };
+        })
+
+    }
 }
 
 
