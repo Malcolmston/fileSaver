@@ -19,17 +19,15 @@
   integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
 <script src="https://kit.fontawesome.com/fd76b8450f.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="./table.js"></script>
+<script src="../../../table.js"></script>
 
 <script >
 
   const data = JSON.parse( ("<%= files %>").replaceAll("&#34;", "\"") )
-  const size = ("<%= size %>")
 
   let inputs = document.createElement("span")
   let table = createDOMtable(data);
 
-  inputs.innerHTML =  size; 
   
   document.body.append(
     inputs
