@@ -35,6 +35,21 @@ app.get("/", async (req, res) => {
   
   })
 
+app.get("/api/v1/myFiles", async (req, res) => {
+    let {username} = req.query
+   if(!username) return;
+
+   try {
+    const file = new File(username);
+    res.status(200).json( (await file.getAllFiles(username)) );
+    
+
+    } catch(e) {
+        console.error( e )
+        res.status(500).json({message: "the given username is not valid", ok: false})
+    }
+})
+
 app.post("/login",async (req, res) => {
     let { username, password } = req.body
   
