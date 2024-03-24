@@ -5,7 +5,9 @@ const multer = require('multer');
 const {sessionMiddleware} = require('./router.js')
 const { Basic, Admin, File } = require('./userManegement.js');
 
+
 const app = express();
+const upload = multer();
 
 
 const {PORT,HOST} = process.env;
