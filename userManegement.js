@@ -23,7 +23,38 @@ const byteSize = require('byte-size')
 const bcrypt = require("bcrypt");
 const fs = require('fs');
 const console = require('console');
+/**
+ * based on a given date and time, this function takes a date and formats in
+ * @param {Date} data a date
+ * @returns {String} formatted date 
+ */
+const lineDate = (data) => {
+    return new Date(data).toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"long", day:"numeric"})
+}
+/**
+ * takes the sql date time and converts the date into a true date
+ * @param {String} str the date
+ * @returns {Date} a date that is given from the str param
+ */
+const SQLDate = (str) => {
+    str = str.replace(" +00:00", "");
+    return  new Date(Date.parse(str));
+}
 
+/**
+ * tests if the contents of an arrar are the same
+ * @param  {...Date} dates a list of dates to compare
+ * @returns {Boolean} true if the contents of the arrays are the same
+ */
+const sameDateds = (...dates) => {
+    return dates.every( (x, i) => {
+        if( i+1 < dates.length ){
+            return dates[i].getTime() == (dates[i+1].getTime()) 
+        } else {
+            return dates[i].getTime() == (dates[0].getTime()) 
+        }
+    }) 
+}
 
 (async () => {
     try {
@@ -677,13 +708,14 @@ class File extends Basic {
         // return  c.value + c.unit
 
         return files.map((json) => {
-            let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
+           // let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
 
 
-            let c = byteSize(size);
+            json.size =  byteSize(size);
+            delete json.deletedAt;
+            json.wasDeleted =  (json.deletedAt == null) ? "No" : "Yes"
 
-
-            return { id, mimetype: icon(mimetype.split("/")[1]), size: c.value + c.unit, originalname, name, createdAt, updatedAt };
+            return json;//{ id, mimetype: icon(mimetype.split("/")[1]), size: c.value + c.unit, originalname, name, createdAt, updatedAt };
         })
 
     }
