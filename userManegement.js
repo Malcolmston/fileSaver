@@ -490,8 +490,7 @@ class Basic extends Account {
     static async login(username, password) {
         if ((await this.isDeleted(username))) return false;
 
-        let user = await User.findOne({ where: { username: username, type: "Basic" } });
-        console.log( user )
+        let user = await User.findOne({ where: { username, type: "Basic" } });
 
         if(!user) return false;
 
