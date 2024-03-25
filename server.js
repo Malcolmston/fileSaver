@@ -293,11 +293,32 @@ app.put("/change/password", async (req, res) => {
             }
         } catch(e){
             console.error( e );
-            res.status(500).json('basic', { message: 'Error '+e, ok: false });
+            res.status(500).json( { message: 'Error '+e, ok: false });
 
         }
     }
 })
+
+app.put("/api/v1/fileRename", async (req, res) => {
+    let { username, fileId, newFileName } = req.query
+
+    if(!username || !fileId || !newFileName) res.static(406).json({message:"you must input the valid data", ok: false});
+    try {
+        let file = new File(username);
+        
+        let f = await file.fileRename(fileId, newFileName);
+
+        if( f ){
+            res.static(200).json({message: "file name was changed", ok: true});
+        } else {
+            res.static(401).json({message:"files name was not changed", ok: false});
+        }
+    } catch (e) {
+        res.status(500).json( { message: 'files are not available without a proper username', ok: false });
+
+    }
+})
+
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
