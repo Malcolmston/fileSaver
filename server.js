@@ -63,7 +63,9 @@ app.get("/api/v1/myFiles", async (req, res) => {
 
 app.get('/api/v1/getFile', async (req, res) => {
     let {id, json, username} = req.query;
-    json = (json ? true : false)
+
+    json = (json == "false" ? false : true) 
+    json = json || false;
 
     if (!id)  res.status(400).send({message: "File ID is required.", ok: false});
     if(!username)  res.status(400).send({message: "username is required", ok: false});
@@ -75,7 +77,7 @@ app.get('/api/v1/getFile', async (req, res) => {
         if(!f) res.status(404).send({message: "The chosen file dose not exist."});
 
         if(json){
-            res.status(200).send(file)
+            res.status(200).send(f)
         } else {
             res.setHeader('Content-Type', f.mimetype);
             res.send(f.data);
