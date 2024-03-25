@@ -668,6 +668,29 @@ class File extends Basic {
         })
 
     }
+
+    /**
+     * this re-names fikes by there given id
+     * @param {integer} id the id of the given file to change
+     * @param {String} newName the new file name to change to
+     * @returns {boolean} true if the file was changed
+     */
+    async fileRename ( id, newName) {
+        try {
+            if ((await this.isDeleted(username))) {
+                return false;
+            }
+            let a = await File.update({ name: newName }, { where: { id} });
+
+            let user = a.getUser();
+
+
+            return this.username == user.username && a[0] == 1;
+        } catch (error) {
+            console.error("Error changing username:", error);
+            return false;
+        }
+    }
 }
 
 
