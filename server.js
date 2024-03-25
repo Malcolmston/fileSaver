@@ -302,16 +302,16 @@ app.put("/change/password", async (req, res) => {
 app.put("/api/v1/fileRename", async (req, res) => {
     let { username, fileId, newFileName } = req.query
 
-    if(!username || !fileId || !newFileName) res.static(406).json({message:"you must input the valid data", ok: false});
+    if(!username || !fileId || !newFileName) res.status(406).json({message:"you must input the valid data", ok: false});
     try {
         let file = new File(username);
         
         let f = await file.fileRename(fileId, newFileName);
 
         if( f ){
-            res.static(200).json({message: "file name was changed", ok: true});
+            res.status(200).json({message: "file name was changed", ok: true});
         } else {
-            res.static(401).json({message:"files name was not changed", ok: false});
+            res.status(401).json({message:"files name was not changed", ok: false});
         }
     } catch (e) {
         res.status(500).json( { message: 'files are not available without a proper username', ok: false });

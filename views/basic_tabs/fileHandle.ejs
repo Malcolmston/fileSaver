@@ -22,6 +22,68 @@
 <script src="../../../table.js"></script>
 
 <script >
+  function changeFile(id, newFile) {
+  // Assuming username, originalName, and newFile are already defined
+
+  // Configuration for the fetch request
+  const options = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  };
+
+  // Sending the fetch request
+  fetch(`/api/v1/fileRename?username="<%= username %>"fileId=${id}&newFileName=${newFile}`, options)
+    .then(response => {
+      if (!response.ok) {
+       console.error('Network response was not ok');
+      }
+      return response.json(); // Assuming response is JSON
+    })
+    .then(data => {
+      console.log('Request succeeded with JSON response:', data);
+      reload(); // Reload the page or perform other actions
+      // Handle response data as needed
+    })
+    .catch(error => {
+      console.error('Request failed:', error);
+      // Handle errors
+    });
+
+}
+
+function removeFile(id) {
+  // Assuming username, originalName, and newFile are already defined
+
+  // Configuration for the fetch request
+  const options = {
+    method: 'put',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  };
+
+  // Sending the fetch request
+  fetch(`/api/v1/fileDelete?id=${id}`, options)
+    .then(response => {
+      if (!response.ok) {
+       console.error('Network response was not ok');
+      }
+      return response.json(); // Assuming response is JSON
+    })
+    .then(data => {
+      console.log('Request succeeded with JSON response:', data);
+      reload(); // Reload the page or perform other actions
+      // Handle response data as needed
+    })
+    .catch(error => {
+      console.error('Request failed:', error);
+      // Handle errors
+    });
+
+}
+
 
   const data = JSON.parse( ("<%= files %>").replaceAll("&#34;", "\"") )
 
@@ -33,7 +95,7 @@
     inputs
       )
 
-      table.addEventListener("click",function(e){
+table.addEventListener("click",function(e){
         let elements =  e.target.parentNode.querySelectorAll("th")
         if( parseInt(elements[0].innerHTML, 10) == NaN || parseInt(elements[0].innerHTML, 10) === null ) return;
 
@@ -50,5 +112,6 @@
   </script>
 
 </body>
+
 
 </html>

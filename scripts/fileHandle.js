@@ -228,81 +228,15 @@ async function submitData(ev) {
   formData = new FormData();
 }
 
-function changeFile({ id, newFile }) {
-  // Assuming username, originalName, and newFile are already defined
-
-  // Configuration for the fetch request
-  const options = {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  };
-
-  // Sending the fetch request
-  fetch(`/api/v1/fileRename?id=${id}&newFile=${newFile}`, options)
-    .then(response => {
-      if (!response.ok) {
-       console.error('Network response was not ok');
-      }
-      return response.json(); // Assuming response is JSON
-    })
-    .then(data => {
-      console.log('Request succeeded with JSON response:', data);
-      reload(); // Reload the page or perform other actions
-      // Handle response data as needed
-    })
-    .catch(error => {
-      console.error('Request failed:', error);
-      // Handle errors
-    });
-
-}
-
-function removeFile(id) {
-  // Assuming username, originalName, and newFile are already defined
-
-  // Configuration for the fetch request
-  const options = {
-    method: 'put',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  };
-
-  // Sending the fetch request
-  fetch(`/api/v1/fileDelete?id=${id}`, options)
-    .then(response => {
-      if (!response.ok) {
-       console.error('Network response was not ok');
-      }
-      return response.json(); // Assuming response is JSON
-    })
-    .then(data => {
-      console.log('Request succeeded with JSON response:', data);
-      reload(); // Reload the page or perform other actions
-      // Handle response data as needed
-    })
-    .catch(error => {
-      console.error('Request failed:', error);
-      // Handle errors
-    });
-
-}
-
-
-window.addEventListener('message', function (event) {
-  fetch(`/api/v1/getFile?id=${event.data}&json=true`).then(res => res.json()).then(async json => {
+window.addEventListener('message', async function (event) {
     let id = event.data
     
     const { value: file } = await Swal.fire({
       title: "Select option",
 
-      imageUrl: `/api/v1/getFile?id=${event.data}&json=false`,
+      imageUrl: `/api/v1/getFile?id=${id}&json=false`,
       imageWidth: 300,
       imageHeight: 300,
-      imageAlt: json.name,
-
       showCancelButton: true,
     
     confirmButtonText: "Rename file",
@@ -321,7 +255,7 @@ window.addEventListener('message', function (event) {
    */
     }).then( result => {
       if (result.isConfirmed) {
-        changeFile({ id, newFile: "a" })
+        changeFile(id, "a" )
         //console.log(json.mimetype.split("/")[1] )
     } else if (result.isDismissed) {
 
@@ -329,24 +263,5 @@ window.addEventListener('message', function (event) {
     }
 
     })
-    /*
-    if (file) {
-      switch (file) {
-        case 1:
-          return;
-      }
-    }
-    */
-
-   
-
-  })
-
-
-  // fetch(`/getFile/${event.data}/true`).then( res => res.json() ).then(console.log)
-  //console.log( event.data );
-  //const seefile = document.querySelector("#seefile")
-  // seefile.setAttribute("src", `/seeFile/${event.data}`);
-
 });
 
