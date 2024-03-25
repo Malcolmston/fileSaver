@@ -61,6 +61,20 @@ app.get("/api/v1/myFiles", async (req, res) => {
     }
 })
 
+app.get('/api/v1/getFile', async (req, res) => {
+    let {id, json, username} = req.query;
+    json = (json ? true : false)
+
+    if (!id)  res.status(400).send({message: "File ID is required.", ok: false});
+    if(!username)  res.status(400).send({message: "username is required", ok: false});
+
+    try {
+        let file = new File(username);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send({message: "Error "+ e, ok: false});
+    }
+})
 
 
 app.post("/login", async (req, res) => {
@@ -318,6 +332,8 @@ app.put("/api/v1/fileRename", async (req, res) => {
 
     }
 })
+
+
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
