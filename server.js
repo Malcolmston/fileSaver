@@ -52,7 +52,7 @@ app.get("/api/v1/myFiles", async (req, res) => {
         if (json) {
             res.json({ files })
         } else {
-            res.render("./basic_tabs/fileHandle", { files })
+            res.render("./basic_tabs/fileHandle", {username, files })
         }
 
     } catch (e) {
@@ -302,11 +302,11 @@ app.put("/change/password", async (req, res) => {
 app.put("/api/v1/fileRename", async (req, res) => {
     let { username, fileId, newFileName } = req.query
 
-    if(!username || !fileId || !newFileName) res.status(406).json({message:"you must input the valid data", ok: false});
+    if(!username || !fileId || Number(fileId) == NaN || !newFileName) res.status(406).json({message:"you must input the valid data", ok: false});
     try {
         let file = new File(username);
         
-        let f = await file.fileRename(fileId, newFileName);
+        let f = await file.fileRename(Number(fileId), newFileName);
 
         if( f ){
             res.status(200).json({message: "file name was changed", ok: true});
@@ -318,7 +318,6 @@ app.put("/api/v1/fileRename", async (req, res) => {
 
     }
 })
-
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);

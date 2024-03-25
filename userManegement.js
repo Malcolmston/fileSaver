@@ -490,7 +490,10 @@ class Basic extends Account {
     static async login(username, password) {
         if ((await this.isDeleted(username))) return false;
 
-        let user = await User.findOne({ where: { username, type: "Basic" } });
+        let user = await User.findOne({ where: { username: username, type: "Basic" } });
+        console.log( user )
+
+        if(!user) return false;
 
         return bcrypt.compareSync(password, user.password);
 
@@ -578,6 +581,23 @@ class File extends Basic {
 
         return true;
     }
+
+        /**
+ * Check if the file has been deleted.
+ * @param {String} fileName the name of the file to check
+ * @returns {Boolean} True if the file has been deleted, false otherwise.
+ */
+        async isDeleted(fileName) {
+            try {    
+                let file = await Files.findOne({ where: { [Op.or]: {name: fileName, originalname: fileName}, deletedAt: { [Op.ne]: [null] } } });
+
+                return file != null;
+            } catch (error) {
+                console.error("Error checking if account is deleted:", error);
+                return false;
+            }
+        }
+    
 
 /**
  * this function creates file for users.
@@ -676,18 +696,22 @@ class File extends Basic {
      * @returns {boolean} true if the file was changed
      */
     async fileRename ( id, newName) {
+        let username = this.username;
+
         try {
             if ((await this.isDeleted(username))) {
                 return false;
             }
-            let a = await File.update({ name: newName }, { where: { id} });
+            let file = await Files.findByPk(id);
+            if(file == null) return false;
 
-            let user = a.getUser();
+            file.name = newName;
 
+            file.save();
 
-            return this.username == user.username && a[0] == 1;
+            return !!file;
         } catch (error) {
-            console.error("Error changing username:", error);
+            console.error("Error changing file name:", error);
             return false;
         }
     }
@@ -695,9 +719,9 @@ class File extends Basic {
 
 
 (async () => {
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: false });
 
-
+/*
     with (Basic) {
         await signUp("a", "a", "a@a", "a", "a")
         await signUp("b", "b", "b@b", "b", "b")
@@ -706,6 +730,7 @@ class File extends Basic {
     with(Admin) {
         await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
     }
+  */  
 
 
     
