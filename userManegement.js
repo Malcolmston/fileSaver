@@ -688,6 +688,17 @@ class File extends Basic {
 
     }
 
+ /**
+  * gets a users file by the file id
+  * @param {String} id the file id to fetch
+  * @returns {JSON | null} gets the file; however if no file is found, then null is returned
+  */
+    async getFile (id) {
+        let userId = await Account.getId(this.username);
+
+        return await Files.findByPk(id, {where: userId, raw: true})
+    }
+
     /**
      * this re-names fikes by there given id
      * @param {integer} id the id of the given file to change
