@@ -47,12 +47,12 @@
     </div>
 
     <div class="tab-pane fade" id="pills-files" role="tabpanel" aria-labelledby="pills-files-tab" tabindex="0">
-        <%- include('./basic_tabs/myFiles'); %>
+      <%- include('./basic_tabs/myFiles'); %>
     </div>
 
 
     <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
-        <%- include('./basic_tabs/changeForms'); %>
+      <%- include('./basic_tabs/changeForms'); %>
     </div>
 
 
@@ -126,108 +126,119 @@
   const username = '<%=username%>';
 
 
-    function changeFile(id, newFile) {
-  // Assuming username, originalName, and newFile are already defined
+  function changeFile(id, newFile) {
+    // Assuming username, originalName, and newFile are already defined
 
-  // Configuration for the fetch request
-  const options = {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  };
-
-  // Sending the fetch request
-  fetch(`/api/v1/fileRename?username=${username}&fileId=${id}&newFileName=${newFile}`, options)
-    .then(response => {
-      if (!response.ok) {
-       console.error('Network response was not ok');
-      }
-      return response.json(); // Assuming response is JSON
-    })
-    .then(data => {
-      console.log('Request succeeded with JSON response:', data);
-      reload(); // Reload the page or perform other actions
-      // Handle response data as needed
-    })
-    .catch(error => {
-      console.error('Request failed:', error);
-      // Handle errors
-    });
-
-}
-
-function removeFile(id) {
-  // Assuming username, originalName, and newFile are already defined
-
-  // Configuration for the fetch request
-  const options = {
-    method: 'put',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  };
-
-  // Sending the fetch request
-  fetch(`/api/v1/fileDelete?id=${id}`, options)
-    .then(response => {
-      if (!response.ok) {
-       console.error('Network response was not ok');
-      }
-      return response.json(); // Assuming response is JSON
-    })
-    .then(data => {
-      console.log('Request succeeded with JSON response:', data);
-      reload(); // Reload the page or perform other actions
-      // Handle response data as needed
-    })
-    .catch(error => {
-      console.error('Request failed:', error);
-      // Handle errors
-    });
-
-}
-
-
-window.addEventListener('message', function (event) {
-    let id = event.data
-    
-    return new Promise( async (resolve, reject) => {
-      const { value: file } = await Swal.fire({
-      title: "Select option",
-
-      imageUrl: `/api/v1/getFile?id=${id}&json=false`,
-      imageWidth: 300,
-      imageHeight: 300,
-      showCancelButton: true,
-    
-    confirmButtonText: "Rename file",
-    cancelButtonText: "Delete file"
-      /*
-      input: "radio",
-      inputOptions: {
-        1: "rename file",
-        2: "remove file"
+    // Configuration for the fetch request
+    const options = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      inputValidator: (value) => {
-        if (!value) {
-          return "You need to choose something!";
+    };
+
+    // Sending the fetch request
+    fetch(`/api/v1/fileRename?username=${username}&fileId=${id}&newFileName=${newFile}`, options)
+      .then(response => {
+        if (!response.ok) {
+          console.error('Network response was not ok');
         }
-      }
-   */
-    }).then( result => {
-      if (result.isConfirmed) { 
-        changeFile(id, "a" )
-        //console.log(json.mimetype.split("/")[1] )
-    } else if (result.isDismissed) {
+        return response.json(); // Assuming response is JSON
+      })
+      .then(data => {
+        console.log('Request succeeded with JSON response:', data);
+        reload(); // Reload the page or perform other actions
+        // Handle response data as needed
+      })
+      .catch(error => {
+        console.error('Request failed:', error);
+        // Handle errors
+      });
 
-      removeFile(id)
-    }
+  }
 
+  function removeFile(id) {
+    // Assuming username, originalName, and newFile are already defined
+
+    // Configuration for the fetch request
+    const options = {
+      method: 'put',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    };
+
+    // Sending the fetch request
+    fetch(`/api/v1/fileDelete?id=${id}`, options)
+      .then(response => {
+        if (!response.ok) {
+          console.error('Network response was not ok');
+        }
+        return response.json(); // Assuming response is JSON
+      })
+      .then(data => {
+        console.log('Request succeeded with JSON response:', data);
+        reload(); // Reload the page or perform other actions
+        // Handle response data as needed
+      })
+      .catch(error => {
+        console.error('Request failed:', error);
+        // Handle errors
+      });
+
+  }
+
+
+  window.addEventListener('message', function (event) {
+    let id = event.data
+
+    return new Promise(async (resolve, reject) => {
+      const { value: file } = await Swal.fire({
+        title: "Select option",
+
+        imageUrl: `/api/v1/getFile?username=${username}&id=${id}&json=false`,
+        imageWidth: 300,
+        imageHeight: 300,
+        //showCancelButton: true,
+        input: "select",
+        inputOptions: {
+          1: "Rename file",
+          2: "Delete file",
+        },
+        inputValidator: (value) => {
+          if (!value) {
+            return "You need to choose something!";
+          } else {
+            if (value == 1) {
+
+              Swal.fire({
+                title: "Enter your a file name",
+                input: "text",
+                inputLabel: "A file name",
+                showCancelButton: true,
+                inputValidator: (value) => {
+                  if (!value) {
+                    return "You need to write something!";
+                  }
+                }
+              }).then((json) => {
+                if (json.isConfirmed) {
+                  changeFile(id, json.value)
+                  toast_message.success("file re-named");
+                } else {
+                  toast_message.error("File was not re-named")
+                }
+              })
+            } else if (value == 2) {
+              removeFile(id);
+            }
+          }
+        }
+
+      })
     })
-    })
 
-});
+  });
 
 
   function reload() {
