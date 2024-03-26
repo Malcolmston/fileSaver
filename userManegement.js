@@ -702,16 +702,16 @@ class File extends Basic {
         let files = await Files.findAll({
             where: { userId },
             attributes: { exclude: ['encoding', 'userId', 'data'] },
-            raw: true
+            raw: true,
+            paranoid: false
         });
         //let c = byteSize(size)
         // return  c.value + c.unit
 
         return files.map((json) => {
            // let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
-
-
-            json.size =  byteSize(size);
+           let d = byteSize(json.size) 
+           json.size =  d.value + d.unit;
             delete json.deletedAt;
 
             json.createdAt =  SQLDate( json.createdAt.toString() );
@@ -719,7 +719,12 @@ class File extends Basic {
 
             if( sameDateds(json.createdAt, json.updatedAt) ){
                 json.updatedAt = "The same as the creation time"
+            } else {
+                json.updatedAt = lineDate( json.updatedAt );
             }
+
+            json.createdAt =  lineDate(json.createdAt);
+
 
             json.wasDeleted =  (json.deletedAt == null) ? "No" : "Yes"
 
