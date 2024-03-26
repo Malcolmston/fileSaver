@@ -628,6 +628,22 @@ class File extends Basic {
             }
         }
     
+        /**
+         * delets a file softly
+         * @param {integer} fileId the id of a file to delete
+         * @returns {boolean} true if the file is deleted
+         */
+        async deleteFile(fileId) {
+            try {
+    
+                await File.destroy({ where: { id: fileId } });
+
+                return true;
+            } catch (error) {
+                console.error("Error deleting account:", error);
+                return false;
+            }
+        }
 
 /**
  * this function creates file for users.
