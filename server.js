@@ -74,8 +74,9 @@ app.get('/api/v1/getFile', async (req, res) => {
         let file = new File(username);
 
         let f = await file.getFile(id);
-        if(!f) res.status(404).send({message: "The chosen file dose not exist."});
+        if(!f) return res.status(404).send({message: "The chosen file dose not exist."});
 
+        console.log( f )
         if(json){
             res.status(200).send(f)
         } else {
@@ -85,7 +86,7 @@ app.get('/api/v1/getFile', async (req, res) => {
 
     } catch (e) {
         console.error(e);
-        res.status(500).send({message: "Error "+ e, ok: false});
+        return res.status(500).send({message: "Error "+ e, ok: false});
     }
 })
 
