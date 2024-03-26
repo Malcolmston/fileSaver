@@ -645,6 +645,23 @@ class File extends Basic {
             }
         }
 
+            /**
+         * restores deleted file
+         * @param {integer} fileId the id of a file to restore
+         * @returns {boolean} true if the file is restored
+         */
+            async restoreFile(fileId) {
+                try {
+        
+                    await Files.restore({ where: { id: fileId } });
+    
+                    return true;
+                } catch (error) {
+                    console.error("Error restoring account:", error);
+                    return false;
+                }
+            }
+
 /**
  * this function creates file for users.
  * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
