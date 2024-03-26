@@ -350,13 +350,13 @@ class Account {
  */
     static async createSafely(username, password, email, type = "Basic", firstName = null, lastName = null) {
         try {
-
-
             if (!(await this.deleteAccount(username))) {
                 return false; // Account already exists
             }
 
             let user = await User.create({ username, password, type, firstName, lastName, email });
+
+            await Log.createMessage("Acccount was created", user.id)
 
             return user.toJSON();
         } catch (error) {
@@ -391,6 +391,7 @@ class Account {
             if (await this.isDeleted(username)) return false;
 
             await User.destroy({ where: { username } });
+            await Log.createMessage("Acccount was deleted", (await Account.getId(username)))
 
             return true;
         } catch (error) {
@@ -411,6 +412,7 @@ class Account {
             }
 
             await user.restore();
+            await Log.createMessage("Acccount was restored", (await Account.getId(username)))
 
             return true;
         } catch (error) {
@@ -431,6 +433,8 @@ class Account {
                 return false;
             }
             let a = await User.update({ firstName }, { where: { username }, limit: 1 });
+            await Log.createMessage("Acccount first name was changed", (await Account.getId(username)))
+
 
             return a[0] == 1;
         } catch (error) {
@@ -450,6 +454,7 @@ class Account {
                 return false;
             }
             let a = await User.update({ lastName }, { where: { username }, limit: 1 });
+            await Log.createMessage("Acccount last name was changed", (await Account.getId(username)))
 
             return a[0] == 1;
         } catch (error) {
@@ -470,7 +475,9 @@ class Account {
                 return false;
             }
             let a = await User.update({ username: newUsername }, { where: { username }, limit: 1 });
-
+            if(a[0] == 1){
+                await Log.createMessage("Acccount  username was changed", (await Account.getId(newUsername)))
+            }
             return a[0] == 1;
         } catch (error) {
             console.error("Error changing username:", error);
@@ -490,6 +497,7 @@ class Account {
                 return false;
             }
             let a = await User.update({ password }, { where: { username }, limit: 1 });
+            await Log.createMessage("Acccount password was changed", (await Account.getId(username)))
 
             return a[0] == 1;
         } catch (error) {
@@ -647,6 +655,8 @@ class File extends Basic {
     
                 await Files.destroy({ where: { id: fileId } });
 
+                await Log.createMessage("a file was deleted", (await Account.getId(this.username)), fileId)
+
                 return true;
             } catch (error) {
                 console.error("Error deleting account:", error);
@@ -661,9 +671,10 @@ class File extends Basic {
          */
             async restoreFile(fileId) {
                 try {
-        
                     await Files.restore({ where: { id: fileId } });
     
+                    await Log.createMessage("a file was restored", (await Account.getId(this.username)), fileId)
+
                     return true;
                 } catch (error) {
                     console.error("Error restoring account:", error);
@@ -702,6 +713,9 @@ class File extends Basic {
 
            
             await f.setUser(u)
+
+            await Log.createMessage("a new file was created", id, f.id)
+
 
             return true;
         } catch (error) {
