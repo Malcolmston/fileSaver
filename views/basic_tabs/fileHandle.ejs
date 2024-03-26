@@ -90,6 +90,7 @@ function removeFile(id) {
   let inputs = document.createElement("span")
   let table = createDOMtable(data);
 
+  inputs.innerHTML = "<%= size %>"
   
   document.body.append(
     inputs
