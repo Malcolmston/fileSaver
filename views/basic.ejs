@@ -169,7 +169,39 @@
     };
 
     // Sending the fetch request
-    fetch(`/api/v1/fileDelte?username=${username}&fileId=${id}`, options)
+    fetch(`/api/v1/fileDelete?username=${username}&fileId=${id}`, options)
+      .then(response => {
+        if (!response.ok) {
+          console.error('Network response was not ok');
+        }
+        return response.json(); // Assuming response is JSON
+      })
+      .then(data => {
+        console.log('Request succeeded with JSON response:', data);
+        reload(); // Reload the page or perform other actions
+        // Handle response data as needed
+      })
+      .catch(error => {
+        console.error('Request failed:', error);
+        // Handle errors
+      });
+
+  }
+
+
+  function restoreFile(id) {
+    // Assuming username, originalName, and newFile are already defined
+
+    // Configuration for the fetch request
+    const options = {
+      method: 'put',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    };
+
+    // Sending the fetch request
+    fetch(`/api/v1/fileRestore?username=${username}&fileId=${id}`, options)
       .then(response => {
         if (!response.ok) {
           console.error('Network response was not ok');
@@ -204,6 +236,7 @@
         inputOptions: {
           1: "Rename file",
           2: "Delete file",
+          3: "Restore file"
         },
         inputValidator: (value) => {
           if (!value) {
@@ -231,6 +264,8 @@
               })
             } else if (value == 2) {
               removeFile(id);
+            } else if (value == 3 ) {
+              restoreFile(id)
             }
           }
         }
