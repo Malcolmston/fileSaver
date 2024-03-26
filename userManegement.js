@@ -577,14 +577,20 @@ class Admin extends Account {
  * creates the logger class 
  */
 class Log {
-    static async createMessage(message, userId) {
+    /**
+     * this function creates messages
+     * @param {String} message the action that is done
+     * @param {number} userId the id of the user that did the transaction
+     * @param {number | null} fileId the file that the transaction is linked to
+     * @returns {boolean} true if the transaction was successful
+     */
+    static async createMessage(message, userId, fileId = null) {
         if (userId == null) return;
-        return await Logger.create({
+        return (await Logger.create({
             message: message,
             userId: userId,
-
-
-        })
+            fileId: fileId
+        })) != null
     }
 }
 
