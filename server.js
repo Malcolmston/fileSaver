@@ -123,6 +123,11 @@ app.post("/signup", async (req, res) => {
     }
 });
 
+app.post("/logout", (req, res) => {
+    req.session.destroy();
+    res.status(200).render('home', { message:"logged out"});
+})
+
 app.post('/fileupload', upload.array('file', 100), async (req, res) => {
     let username = req.session.username
 
