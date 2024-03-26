@@ -292,6 +292,9 @@ const Logger = sequelize.define("logger", {
 User.hasMany(Logger);
 Logger.belongsTo(User);
 
+Files.hasMany(Logger);
+Logger.belongsTo(Files);
+
 User.hasMany(Files);
 Files.belongsTo(User);
 
