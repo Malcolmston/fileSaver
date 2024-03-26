@@ -636,7 +636,7 @@ class File extends Basic {
         async deleteFile(fileId) {
             try {
     
-                await File.destroy({ where: { id: fileId } });
+                await Files.destroy({ where: { id: fileId } });
 
                 return true;
             } catch (error) {
@@ -728,7 +728,6 @@ class File extends Basic {
            // let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
            let d = byteSize(json.size) 
            json.size =  d.value + d.unit;
-            delete json.deletedAt;
 
             json.createdAt =  SQLDate( json.createdAt.toString() );
             json.updatedAt = SQLDate( json.updatedAt.toString() );
@@ -743,6 +742,8 @@ class File extends Basic {
 
 
             json.wasDeleted =  (json.deletedAt == null) ? "No" : "Yes"
+            delete json.deletedAt;
+
 
             return json;//{ id, mimetype: icon(mimetype.split("/")[1]), size: c.value + c.unit, originalname, name, createdAt, updatedAt };
         })
@@ -757,7 +758,7 @@ class File extends Basic {
     async getFile (id) {
         let userId = await Account.getId(this.username);
 
-        return await Files.findByPk(id, {where: userId, raw: true})
+        return await Files.findByPk(id, {where: userId,  paranoid: false, raw: true})
     }
 
     /**
