@@ -169,7 +169,7 @@
     };
 
     // Sending the fetch request
-    fetch(`/api/v1/fileDelete?id=${id}`, options)
+    fetch(`/api/v1/fileDelte?username=${username}&fileId=${id}`, options)
       .then(response => {
         if (!response.ok) {
           console.error('Network response was not ok');
