@@ -392,7 +392,17 @@ app.put("/api/v1/fileRestore", async (req, res) => {
     }
 })
 
+app.delete("/deleteAccount", async (req, res) => {
+    let username = req.session.username;
 
+    if(!username) req.status(403).json({ message: "user is reqired", ok: false})
+
+    let del = await Basic.deleteAccount(username);
+    if(!del) req.status(403).json({ message: "account was not deleted", ok: false})
+
+    req.session.destroy();
+    res.status(200).render('home', { message:"logged out", ok: true});
+})
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
