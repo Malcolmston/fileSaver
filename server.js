@@ -346,7 +346,7 @@ app.put("/api/v1/fileRename", async (req, res) => {
     }
 })
 
-app.put("/api/v1/fileDelte", async (req, res) => {
+app.put("/api/v1/fileDelete", async (req, res) => {
     let { username, fileId } = req.query
 
     if(!username || !fileId || Number(fileId) == NaN ) res.status(406).json({message:"you must input the valid data", ok: false});
@@ -359,6 +359,26 @@ app.put("/api/v1/fileDelte", async (req, res) => {
             res.status(200).json({message: "file name was changed", ok: true});
         } else {
             res.status(401).json({message:"files name was not changed", ok: false});
+        }
+    } catch (e) {
+        res.status(500).json( { message: 'files are not available without a proper username', ok: false });
+
+    }
+})
+
+app.put("/api/v1/fileRestore", async (req, res) => {
+    let { username, fileId } = req.query
+
+    if(!username || !fileId || Number(fileId) == NaN ) res.status(406).json({message:"you must input the valid data", ok: false});
+    try {
+        let file = new File(username);
+        
+        let f = await file.restoreFile(fileId);
+
+        if( f ){
+            res.status(200).json({message: "file name was restored", ok: true});
+        } else {
+            res.status(401).json({message:"files name was not restored", ok: false});
         }
     } catch (e) {
         res.status(500).json( { message: 'files are not available without a proper username', ok: false });
