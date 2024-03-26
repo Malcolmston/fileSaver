@@ -790,6 +790,11 @@ class File extends Basic {
 
     }
 
+    async getSize() {
+        let userId = await Account.getId(this.username);
+        return await Files.sum("size", {where: {userId}})
+    }
+
  /**
   * gets a users file by the file id
   * @param {String} id the file id to fetch
@@ -832,23 +837,6 @@ class File extends Basic {
 
 (async () => {
     await sequelize.sync({ force: false });
-
-/*
-    with (Basic) {
-        await signUp("a", "a", "a@a", "a", "a")
-        await signUp("b", "b", "b@b", "b", "b")
-        }
-
-    with(Admin) {
-        await signUp("MalcolmAdmin", "MalcolmAdmin18$", "mstone@code.com")
-    }
-  */  
-
-
-    
-    
-
-
 })()
 
 

@@ -48,11 +48,11 @@ app.get("/api/v1/myFiles", async (req, res) => {
     try {
 
         let files = JSON.stringify((await file.getAllFiles(username)))
-
+        let size = (await file.getSize());
         if (json) {
             res.json({ files })
         } else {
-            res.render("./basic_tabs/fileHandle", {username, files })
+            res.render("./basic_tabs/fileHandle", {username, files, size})
         }
 
     } catch (e) {
