@@ -713,6 +713,14 @@ class File extends Basic {
 
             json.size =  byteSize(size);
             delete json.deletedAt;
+
+            json.createdAt =  SQLDate( json.createdAt.toString() );
+            json.updatedAt = SQLDate( json.updatedAt.toString() );
+
+            if( sameDateds(json.createdAt, json.updatedAt) ){
+                json.updatedAt = "The same as the creation time"
+            }
+
             json.wasDeleted =  (json.deletedAt == null) ? "No" : "Yes"
 
             return json;//{ id, mimetype: icon(mimetype.split("/")[1]), size: c.value + c.unit, originalname, name, createdAt, updatedAt };
