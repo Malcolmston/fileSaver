@@ -891,6 +891,8 @@ class Groups {
      * @returns {Boolean} true if room was added successfully
      */
     static async createRoom(...users) {
+        if( (await this.isRoom(...users)) ) return false;
+
         let room = await Rooms.create({name: "bob"});
 
         let roomPeople = users.filter(async username => {
@@ -937,7 +939,7 @@ class Groups {
                });
         
                if( count === users.length && count === userIds.length ){
-                return room
+                return true
                } else {
                 continue;
                }
@@ -960,7 +962,9 @@ class Groups {
 
     with (Groups) {
         await createRoom("a","b");
-       console.log( (await getRoom("a", "b") ))
+        await createRoom("a","b");
+
+     //  console.log( (await getRoom("a", "b") ))
     }
 })()
 
