@@ -534,6 +534,7 @@ class Basic extends Account {
 
         let user = await User.findOne({ where: { username, type: "Basic" } });
 
+
         if(!user) return false;
 
         return bcrypt.compareSync(password, user.password);
@@ -792,7 +793,9 @@ class File extends Basic {
 
     async getSize() {
         let userId = await Account.getId(this.username);
-        return await Files.sum("size", {where: {userId}})
+        let json = byteSize(await Files.sum("size", {where: {userId}}))
+
+        return json.value + " " + json.long;
     }
 
  /**
