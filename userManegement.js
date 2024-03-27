@@ -332,6 +332,10 @@ Logger.belongsTo(Files);
 User.hasMany(Files);
 Files.belongsTo(User);
 
+
+User.belongsToMany(Rooms, {through:Members})
+Rooms.belongsToMany(User, {through:Members})
+
 /**
  * Create and manage accounts for users
  */
