@@ -407,11 +407,11 @@ class Account {
      */
     static async restoreAccount(username) {
         try {
-            if ((await this.deleteAccount(username))) {
+            if (!(await this.deleteAccount(username))) {
                 return false; // Account already exists
             }
 
-            await user.restore();
+            await User.restore();
             await Log.createMessage("Acccount was restored", (await Account.getId(username)))
 
             return true;
