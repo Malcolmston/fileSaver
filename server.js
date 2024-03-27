@@ -91,9 +91,11 @@ app.get('/api/v1/getFile', async (req, res) => {
 })
 
 
-app.post("/login", async (req, res) => {
+app.all("/login", async (req, res) => {
     let { username, password } = req.body
 
+    if( !username || !password )  res.status(400).render('home', { message: "login failed, please try again" });
+    try {
     let a = await Basic.login(username, password);
 
     if (a) {
@@ -101,10 +103,13 @@ app.post("/login", async (req, res) => {
         req.session.username = username
         req.session.isAdmin = false;
 
-        res.render('basic', { username, message: "" });
+        res.status(200).render('basic', { username, message: "" });
     } else {
-        res.render('home', { message: "login failed" });
+        res.status(400).render('home', { message: "login failed" });
     }
+}catch(e){
+    res.status(500).render('home', { message: "login failed, due to a server error" })
+}
 })
 
 app.post("/signup", async (req, res) => {
@@ -397,11 +402,16 @@ app.delete("/deleteAccount", async (req, res) => {
 
     if(!username) req.status(403).json({ message: "user is reqired", ok: false})
 
+    try {
     let del = await Basic.deleteAccount(username);
-    if(!del) req.status(403).json({ message: "account was not deleted", ok: false})
+    if(!del) res.status(403).json({ message: "account was not deleted", ok: false})
 
     req.session.destroy();
-    res.status(200).render('home', { message:"logged out", ok: true});
+    res.status(200).json({ message: "account was deleted", ok: true });//.render('home', { message:"logged out", ok: true});
+    } catch ( e) {
+        console.error( e );
+        res.status(500).json({ message: "account was not deleted, Ddue to a server error", ok: false})
+    }
 })
 
 app.listen(PORT, HOST);
