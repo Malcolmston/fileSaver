@@ -309,15 +309,19 @@ const Members = sequelize.define("member", {
     },
     switch: {
         type: DataTypes.TINYINT,
-        set: function (value) {
-            if(value == -1 || value == null) this.setDataValue("switch", -1);
-            else if(value == 0 && value != null) this.setDataValue("switch", 0);
-            else if(value == 1 && value && value != null) this.setDataValue("switch", 1);
-            else this.setDataValue("switch", -1);
+        get: function () {
+            let value = this.getDataValue("switch");
+            if(value == -1 || value == null) return -1
+            else if(value == 0 && value != null) return 0
+            else if(value == 1 && value && value != null) return 1;
+            else return -1;
         },
         validate: {
             isSwitch (value) {
-                return (value >= -1 && value <= 1)
+                if( !(value >= -1 && value <= 1) ){
+                    throw new Error("invalid value" + value + " is not a switch");
+                }
+                
             }
         }
     }
@@ -883,7 +887,34 @@ class File extends Basic {
  * this class handes rooms
  */
 class Groups {
+    /**
+     * adds x amouount of users to a room, where x is the amount of users.
+     * @param  {...String} users a list of usernames to be added to a room
+     * @returns {Boolean} true if room was added successfully
+     */
+    static async createRoom(...users) {
+        let room = await Rooms.create({name: "bob"});
 
+        let roomPeople = users.filter(async username => {
+            return !(await Account.isDeleted(username)) 
+        })
+
+        roomPeople = await Promise.all( roomPeople );
+
+        roomPeople.map(async username => {
+            let userId = await Account.getId(username);
+            return {userId, RoomId: room.id}
+        })
+
+        roomPeople = await Promise.all( roomPeople );
+
+        try {
+            await Members.bulkCreate(roomPeople)
+            return true
+        } catch (err) {
+            return false
+        }
+    }
 }
 
 
@@ -894,6 +925,10 @@ class Groups {
         await signUp("a","a","a@a", "a", "a");
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
+    }
+
+    with (Groups) {
+        await createRoom("a","b");
     }
 })()
 
