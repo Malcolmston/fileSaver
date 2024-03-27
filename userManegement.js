@@ -21,8 +21,6 @@ const sequelize = new Sequelize({
 
 const byteSize = require('byte-size')
 const bcrypt = require("bcrypt");
-const fs = require('fs');
-const console = require('console');
 /**
  * based on a given date and time, this function takes a date and formats in
  * @param {Date} data a date
@@ -901,12 +899,13 @@ class Groups {
 
         roomPeople = await Promise.all( roomPeople );
 
-        roomPeople.map(async username => {
+        roomPeople = roomPeople.map(async username => {
             let userId = await Account.getId(username);
-            return {userId, RoomId: room.id}
+            return {userId, roomId: room.id}
         })
 
         roomPeople = await Promise.all( roomPeople );
+
 
         try {
             await Members.bulkCreate(roomPeople)
@@ -914,6 +913,38 @@ class Groups {
         } catch (err) {
             return false
         }
+    }
+
+    /**
+     * gets wether or not a room exists
+     * @param  {...String} users a list of usernames to be added to a room
+     * @returns {Boolean} true if the room already exists
+     */
+    static async isRoom (...users) {
+        let userIds = users.map(async username => {
+            let userId = await Account.getId(username);
+            return userId
+        })
+        let rooms = (await Rooms.findAll({raw: true})).map( x => x.id )
+
+        userIds = await Promise.all(userIds);
+
+        for(let room of rooms) {
+            let {count} = await Members.findAndCountAll({
+                where: {
+                    roomId:room, //rooms[0]
+                }
+               });
+        
+               if( count === users.length && count === userIds.length ){
+                return room
+               } else {
+                continue;
+               }
+        }
+        return false;
+        
+
     }
 }
 
@@ -929,6 +960,7 @@ class Groups {
 
     with (Groups) {
         await createRoom("a","b");
+       console.log( (await getRoom("a", "b") ))
     }
 })()
 
