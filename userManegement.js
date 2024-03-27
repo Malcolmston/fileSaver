@@ -305,6 +305,11 @@ const Members = sequelize.define("member", {
         primaryKey: true,
         autoIncrement: true
     },
+    place: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false
+    },
     switch: {
         type: DataTypes.TINYINT,
         get: function () {
