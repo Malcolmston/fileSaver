@@ -338,6 +338,8 @@ Files.belongsTo(User);
 User.belongsToMany(Rooms, {through:Members})
 Rooms.belongsToMany(User, {through:Members})
 
+Files.belongsToMany(Rooms, {through:"FileRooms"})
+
 /**
  * Create and manage accounts for users
  */
