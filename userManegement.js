@@ -997,6 +997,25 @@ class Groups {
             return false;
         }
     }
+    /**
+     * this function can upgrade or down grade users place
+     * @param {number} roomId the id of the room
+     * @param {String} username the username of the single user
+     * @param {0 | 1 | 2} newPlace the users accout status
+     * @returns {boolean} true if the user placeId was changed
+     */
+    static async changeMember (roomId, username, newPlace) {
+        let userId = await Account.getId(username);
+        
+        let a = await Members.find({where: {roomId, userId}})
+
+        if(!a) return false;
+        
+        a.place = newPlace;
+
+        a.save();
+        return true;
+    }
 
 
 }
@@ -1017,8 +1036,6 @@ class Groups {
         await createRoom("a","c");
 
         await createRoom("c","a");
-
-        await pop(1,"b")
      //  console.log( (await getRoom("a", "b") ))
     }
 })()
