@@ -307,7 +307,7 @@ const Members = sequelize.define("member", {
     },
     place: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: 1,
         allowNull: false
     },
     switch: {
@@ -908,9 +908,14 @@ class Groups {
 
         roomPeople = await Promise.all( roomPeople );
 
-        roomPeople = roomPeople.map(async username => {
+        roomPeople = roomPeople.map(async (username, index) => {
             let userId = await Account.getId(username);
-            return {userId, roomId: room.id}
+            if( index === 0 ){
+                return {userId, roomId: room.id, place: 2}
+            } else {
+                return {userId, roomId: room.id}
+            }
+            
         })
 
         roomPeople = await Promise.all( roomPeople );
