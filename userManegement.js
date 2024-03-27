@@ -981,6 +981,24 @@ class Groups {
             return false;
         }
     }
+
+    /**
+     * removes a user from a given room
+     * @param {number} roomId the id of the room to join
+     * @param {String} username the username of the single user to remove from the room
+     * @returns {boolean} true if the room was successfully left
+     */
+    static async pop(roomId,username) {
+        let userId = await Account.getId(username);
+
+        try {
+            return (await Members.destroy({where: {roomId, userId}})) == 1
+        } catch (e) {
+            return false;
+        }
+    }
+
+
 }
 
 
@@ -1000,6 +1018,7 @@ class Groups {
 
         await createRoom("c","a");
 
+        await pop(1,"b")
      //  console.log( (await getRoom("a", "b") ))
     }
 })()
