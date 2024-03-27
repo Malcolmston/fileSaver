@@ -575,7 +575,11 @@ class Admin extends Account {
 
 
     }
-
+/**
+ * this function restores account, using the Account version
+ * @param {String} username the username of the basic user to restore
+ * @see Acccount.restoreAccount
+ */
     static async restore(username) {
         return await this.restoreAccount(username);
     }
