@@ -966,11 +966,11 @@ class Groups {
     /**
      * this function adds users to a room
      * @param {number} roomId the id of the room to join
-     * @param {String} user the username of the single user to add to the room
+     * @param {String} username the username of the single user to add to the room
      * @param {0 | 1 | 2} place the users accout status
      * @returns {boolean} true if the room was successfully joined
      */
-    static async append(roomId,user, place = 0) {
+    static async append(roomId,username, place = 0) {
         let userId = await Account.getId(username);
 
         if( place < 0 || place >2 ) place = 0;
