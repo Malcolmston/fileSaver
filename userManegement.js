@@ -893,7 +893,7 @@ class Groups {
     static async createRoom(...users) {
         if( (await this.isRoom(...users)) ) return false;
 
-        let room = await Rooms.create({name: "bob"});
+        let room = await Rooms.create({name: users.join("") });
 
         let roomPeople = users.filter(async username => {
             return !(await Account.isDeleted(username)) 
@@ -932,13 +932,15 @@ class Groups {
         userIds = await Promise.all(userIds);
 
         for(let room of rooms) {
-            let {count} = await Members.findAndCountAll({
+            let {count, rows} = await Members.findAndCountAll({
                 where: {
                     roomId:room, //rooms[0]
-                }
+                    [Op.or]: {userId: userIds}
+                },
+                raw: true,
                });
         
-               if( count === users.length && count === userIds.length ){
+               if( rows.length === users.length ){
                 return true
                } else {
                 continue;
@@ -962,7 +964,10 @@ class Groups {
 
     with (Groups) {
         await createRoom("a","b");
-        await createRoom("a","b");
+        await createRoom("b","c");
+        await createRoom("a","c");
+
+        await createRoom("c","a");
 
      //  console.log( (await getRoom("a", "b") ))
     }
