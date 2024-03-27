@@ -64,6 +64,10 @@
         </div>
 
       </form>
+
+      <input class="btn btn-outline-warning" id="deleteAccount" type="submit" value="Delete account"/>
+    
+
 </body>
 </html>
 
@@ -76,12 +80,41 @@ let fm1 = document.querySelector('#form_1'),
     fm2 = document.querySelector('#form_2'),
     //fm3 = document.querySelector('#form_3'),
     fm3 = document.querySelector('#form_3'),
-    fm4 = document.querySelector('#form_4');
+    fm4 = document.querySelector('#form_4'),
+    rm5 = document.querySelector('#deleteAccount');
 
 
 const forms = [{ form: fm1, req: "fname" }, { form: fm2, req: "lname" }, { form: fm3, req: "username" }, { form: fm4, req: "password" } ];
 
-
+rm5.addEventListener("click", (event) => {
+  Swal.fire({
+  title: "Are you sure you want to delete this account?",
+  text: "You can always have your account recoverd",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "#3085d6",
+  cancelButtonColor: "#d33",
+  confirmButtonText: "Yes, delete it!"
+}).then((result) => {
+  if (result.isConfirmed) {
+    fetch('/deleteAccount', {method: 'DELETE'}).then(x => x.json() ).then( (data) => {
+      if( data.ok ){
+       toast_message.success(data.message);
+    window.location.reload();
+      } else {
+        toast_message.error(data.message);
+      }
+    })
+    /*
+    Swal.fire({
+      title: "Deleted!",
+      text: "Your file has been deleted.",
+      icon: "success"
+    });
+    */
+  }
+});
+})
 
 forms.forEach((box) => {
     let req = box.req;
