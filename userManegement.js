@@ -879,9 +879,22 @@ class File extends Basic {
     }
 }
 
+/**
+ * this class handes rooms
+ */
+class Groups {
+
+}
+
 
 (async () => {
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ force: true });
+
+    with (Basic) {
+        await signUp("a","a","a@a", "a", "a");
+        await signUp("b","b","b@b", "b", "b");
+        await signUp("c","c","c@c", "c", "c");
+    }
 })()
 
 
