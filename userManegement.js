@@ -288,6 +288,40 @@ const Logger = sequelize.define("logger", {
 
 }, { paranoid: true })
 
+const Rooms = sequelize.define("room", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    name: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        unique: true
+    }
+}, { paranoid: true })
+
+const Members = sequelize.define("member", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    switch: {
+        type: DataTypes.TINYINT,
+        set: function (value) {
+            if(value == -1 || value == null) this.setDataValue("switch", -1);
+            else if(value == 0 && value != null) this.setDataValue("switch", 0);
+            else if(value == 1 && value && value != null) this.setDataValue("switch", 1);
+            else this.setDataValue("switch", -1);
+        },
+        validate: {
+            isSwitch (value) {
+                return (value >= -1 && value <= 1)
+            }
+        }
+    }
+})
 
 User.hasMany(Logger);
 Logger.belongsTo(User);
