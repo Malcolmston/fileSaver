@@ -54,6 +54,7 @@ const sameDateds = (...dates) => {
     }) 
 }
 
+
 (async () => {
     try {
         await sequelize.authenticate();
@@ -294,8 +295,8 @@ const Rooms = sequelize.define("room", {
     },
     name: {
         type: DataTypes.TEXT,
-        allowNull: false,
-        unique: true
+        unique: true,
+        allowNull: false
     }
 }, { paranoid: true })
 
@@ -330,20 +331,18 @@ const Members = sequelize.define("member", {
     }
 })
 
+
 User.hasMany(Logger);
 Logger.belongsTo(User);
-
-Files.hasMany(Logger);
-Logger.belongsTo(Files);
 
 User.hasMany(Files);
 Files.belongsTo(User);
 
+Rooms.hasMany(Files);
+Files.belongsTo(Rooms);
 
 User.belongsToMany(Rooms, {through:Members})
 Rooms.belongsToMany(User, {through:Members})
-
-Files.belongsToMany(Rooms, {through:"FileRooms"})
 
 /**
  * Create and manage accounts for users
@@ -900,7 +899,7 @@ class Groups {
     static async createRoom(...users) {
         if( (await this.isRoom(...users)) ) return false;
 
-        let room = await Rooms.create({name: users.join("") });
+        let room = await Rooms.create({name: Math.random().toString(36).substring(2,7) });
 
         let roomPeople = users.filter(async username => {
             return !(await Account.isDeleted(username)) 
@@ -1017,7 +1016,36 @@ class Groups {
         return true;
     }
 
+/**
+ * this function creates file for users.
+ * @param {number} roomId the id of the room to join
+ * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
+ * @param {String} mimetype the files minetype
+ * @param {integer} size the size of a file
+ * @param {String} originalname the original name of the file to be created
+ * @param {String | null} name either the original name of the file or a custum alias for the file
+ * @param {Blob} data the file as a blob to be added to the array
+ * @returns {Boolean} true if the file was added successfully;
+ */
+static async fileCreate(roomId, encoding, mimetype, size, originalname, data, name = null) {
+    try {
+        let u = await Rooms.findByPk(roomId);
 
+        // Count files with the same originalname prefix
+
+        // Create file entry
+        let  f = await Files.create({ encoding, mimetype, size, originalname, name, data});
+       
+        await f.setRoom(u)
+
+        console.log( f )
+
+        return true;
+    } catch (error) {
+        console.error('Error in fileCreate:', error);
+        return false; // Return null on error
+    }
+}
 }
 
 
@@ -1042,5 +1070,5 @@ class Groups {
 
 
 module.exports = {
-    Basic, Admin, File
+    Basic, Admin, File, Groups
 }
