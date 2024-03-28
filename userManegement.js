@@ -996,6 +996,23 @@ class Groups {
             return false;
         }
     }
+
+    /**
+     * gets all the room assoseaed to a user
+     * @param {String} username the username of the user
+     * @returns {Object | null} gets an object of all the users rooms or null
+     */
+    static async myRooms(username) {
+        let userId = await Account.getId(username);
+
+        if(!userId) return null;
+
+        let memb = await Members.findAll({where: {userId}, raw: true})
+        memb = [...new Set( memb.map(room => room.roomId) )]
+
+        return ( await Members.findAll({where: {roomId: {[Op.or]: memb}}, raw: true}) );
+    }
+
     /**
      * this function can upgrade or down grade users place
      * @param {number} roomId the id of the room
@@ -1037,8 +1054,6 @@ static async fileCreate(roomId, encoding, mimetype, size, originalname, data, na
         let  f = await Files.create({ encoding, mimetype, size, originalname, name, data});
        
         await f.setRoom(u)
-
-        console.log( f )
 
         return true;
     } catch (error) {
