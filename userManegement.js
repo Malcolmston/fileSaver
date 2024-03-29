@@ -910,7 +910,7 @@ class Groups {
         roomPeople = roomPeople.map(async (username, index) => {
             let userId = await Account.getId(username);
             if( index === 0 ){
-                return {userId, roomId: room.id, place: 2}
+                return {userId, roomId: room.id, place: 2, switch: 1}
             } else {
                 return {userId, roomId: room.id}
             }
@@ -926,6 +926,16 @@ class Groups {
         } catch (err) {
             return false
         }
+    }
+/**
+ * this function gets the id of a room by its name
+ * @param {Strign} name The name of the room
+ * @returns {integer} n > 0 if the room exists and -1 otherwise
+ */
+    static async getRoom (name) {
+        let r = await Room.findOne({where: {name}})
+
+        return r != null ? r.id : -1
     }
 
     /**
