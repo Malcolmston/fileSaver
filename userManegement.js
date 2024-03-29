@@ -1010,7 +1010,47 @@ class Groups {
         let memb = await Members.findAll({where: {userId}, raw: true})
         memb = [...new Set( memb.map(room => room.roomId) )]
 
-        return ( await Members.findAll({where: {roomId: {[Op.or]: memb}}, raw: true}) );
+        let res = await Members.findAll({where: {roomId: {[Op.or]: memb} }, raw: true} );
+
+        res = await Promise.all(res.map( async (row, index) => {
+            var {userId, roomId} = row;
+            let joined = row.switch;
+
+            if(joined == 2) res[index].switch = true 
+            else if(joined == 1) res[index].switch = false;
+            else res[index].switch = null;
+
+            let user = await User.findByPk(userId);
+            let room = await Rooms.findByPk(roomId, {attributes: {
+                exclude: ["createdAt", "updatedAt", "deletedAt"]
+            }});
+
+            
+
+
+            return {user: {firstName: user.firstName, lastName: user.lastName, username: user.username}, name: room.name, joined: res[index].switch }
+        }));
+
+
+        let json = {};
+        for(let row of res) {
+            let u = {}
+            if( Object.keys(json).includes(row.name) ){
+                u.user = row.user
+                u.joined = row.joined
+                json[row.name].push( u )
+            } else {
+                json[row.name] = [];
+                
+                u.user = row.user
+                u.joined = row.joined
+                json[row.name].push( u )
+
+            }
+        }
+
+
+        return json
     }
 
     /**
