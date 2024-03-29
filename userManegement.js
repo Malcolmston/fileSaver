@@ -1111,6 +1111,28 @@ static async fileCreate(roomId, encoding, mimetype, size, originalname, data, na
         return false; // Return null on error
     }
 }
+
+/**
+ * update a users acount to either joined on not joined
+ * @param {number} roomId the id of the room to join
+ * @param {String} username the username of the single user
+ * @param {number | 1} switchValue the value to switch a user join status
+ * @returns 
+ */
+    static async join (roomId, username, switchValue = 1) {
+                
+        let userId = await Account.getId(username);
+
+        if(!userId) return false;
+
+        try{ 
+            await Members.update({switch: switchValue}, {where: {roomId, userId} })
+            return true
+        } catch(e) {
+            return false;
+        }
+    }
+
 }
 
 
