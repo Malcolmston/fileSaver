@@ -933,7 +933,7 @@ class Groups {
  * @returns {integer} n > 0 if the room exists and -1 otherwise
  */
     static async getRoom (name) {
-        let r = await Room.findOne({where: {name}})
+        let r = await Rooms.findOne({where: {name}})
 
         return r != null ? r.id : -1
     }
