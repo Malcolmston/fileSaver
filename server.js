@@ -47,7 +47,7 @@ app.get("/api/v1/myFiles", async (req, res) => {
 
     try {
 
-        let files = JSON.stringify((await file.getAllFiles(username)))
+        let files = JSON.stringify((await File.getAllFiles(username)))
         let size = (await file.getSize());
         if (json) {
             res.json({ files })

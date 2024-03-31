@@ -406,7 +406,7 @@ class Account {
 
             return user.toJSON();
         } catch (error) {
-            console.error("Error creating account:", error);
+           // console.error("Error creating account:", error);
             return false;
         }
     }
@@ -418,10 +418,11 @@ class Account {
      */
     static async getId(username) {
         try {
+
             let user = await User.findOne({ where: { username: username } });
             return user ? user.id : null;
         } catch (error) {
-            console.error("Error retrieving user ID:", error);
+            console.error("Error retrieving user ID:");
             return null;
         }
     }
@@ -802,12 +803,14 @@ class File extends Basic {
      * @param {String} username the username of the account to get information
      * @returns {ArrayList<JSON>} returns a list of the found file
      */
-    async getAllFiles (username) {
+    static async getAllFiles (username, room = null) {
         let userId = await Account.getId(username);
+        let roomId = room ? (await Groups.getRoom(room) )  : null
+        roomId <= 0 ? null : roomId;
 
-
+        
         let files = await Files.findAll({
-            where: { userId },
+            where: { userId, roomId},
             attributes: { exclude: ['encoding', 'userId', 'data'] },
             raw: true,
             paranoid: false
@@ -933,7 +936,7 @@ class Groups {
  * @returns {integer} n > 0 if the room exists and -1 otherwise
  */
     static async getRoom (name) {
-        let r = await Rooms.findOne({where: {name}})
+        let r = await Rooms.findOne({where: {name: name}})
 
         return r != null ? r.id : -1
     }
@@ -950,7 +953,9 @@ class Groups {
         })
         let rooms = (await Rooms.findAll({raw: true})).map( x => x.id )
 
+
         userIds = await Promise.all(userIds);
+
 
         for(let room of rooms) {
             let {count, rows} = await Members.findAndCountAll({
@@ -960,7 +965,8 @@ class Groups {
                 },
                 raw: true,
                });
-        
+
+               
                if( rows.length === users.length ){
                 return true
                } else {
@@ -1137,13 +1143,15 @@ static async fileCreate(roomId, encoding, mimetype, size, originalname, data, na
 
 
 (async () => {
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: false });
 
+    /*
     with (Basic) {
         await signUp("a","a","a@a", "a", "a");
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
     }
+*/
 
     with (Groups) {
         await createRoom("a","b");
@@ -1151,6 +1159,7 @@ static async fileCreate(roomId, encoding, mimetype, size, originalname, data, na
         await createRoom("a","c");
 
         await createRoom("c","a");
+
      //  console.log( (await getRoom("a", "b") ))
     }
 })()
