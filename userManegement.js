@@ -27,7 +27,7 @@ const bcrypt = require("bcrypt");
  * @returns {String} formatted date 
  */
 const lineDate = (data) => {
-    return new Date(data).toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"long", day:"numeric"})
+    return new Date(data).toLocaleDateString('en-us', { weekday: "long", year: "numeric", month: "long", day: "numeric" })
 }
 /**
  * takes the sql date time and converts the date into a true date
@@ -36,7 +36,7 @@ const lineDate = (data) => {
  */
 const SQLDate = (str) => {
     str = str.replace(" +00:00", "");
-    return  new Date(Date.parse(str));
+    return new Date(Date.parse(str));
 }
 
 /**
@@ -45,13 +45,13 @@ const SQLDate = (str) => {
  * @returns {Boolean} true if the contents of the arrays are the same
  */
 const sameDateds = (...dates) => {
-    return dates.every( (x, i) => {
-        if( i+1 < dates.length ){
-            return dates[i].getTime() == (dates[i+1].getTime()) 
+    return dates.every((x, i) => {
+        if (i + 1 < dates.length) {
+            return dates[i].getTime() == (dates[i + 1].getTime())
         } else {
-            return dates[i].getTime() == (dates[0].getTime()) 
+            return dates[i].getTime() == (dates[0].getTime())
         }
-    }) 
+    })
 }
 
 
@@ -240,15 +240,15 @@ const User = sequelize.define("user", {
         unique: true,
 
         validate: {
-            isValid: function(value) {
+            isValid: function (value) {
                 let type = this.getDataValue("type");
 
-                if( type === "Basic"){
-                    
-                } else if( type === "Admin" ){
+                if (type === "Basic") {
+
+                } else if (type === "Admin") {
                     let reg = /\w{7,}\d{0,4}/g
 
-                    if( !reg.test(value) ) {
+                    if (!reg.test(value)) {
                         throw new Error("A admin username must have atlest 7 letters and can have up to 4 numbers")
                     }
                 }
@@ -315,17 +315,17 @@ const Members = sequelize.define("member", {
         type: DataTypes.TINYINT,
         get: function () {
             let value = this.getDataValue("switch");
-            if(value == -1 || value == null) return -1
-            else if(value == 0 && value != null) return 0
-            else if(value == 1 && value && value != null) return 1;
+            if (value == -1 || value == null) return -1
+            else if (value == 0 && value != null) return 0
+            else if (value == 1 && value && value != null) return 1;
             else return -1;
         },
         validate: {
-            isSwitch (value) {
-                if( !(value >= -1 && value <= 1) ){
+            isSwitch(value) {
+                if (!(value >= -1 && value <= 1)) {
                     throw new Error("invalid value" + value + " is not a switch");
                 }
-                
+
             }
         }
     }
@@ -341,8 +341,8 @@ Files.belongsTo(User);
 Rooms.hasMany(Files);
 Files.belongsTo(Rooms);
 
-User.belongsToMany(Rooms, {through:Members})
-Rooms.belongsToMany(User, {through:Members})
+User.belongsToMany(Rooms, { through: Members })
+Rooms.belongsToMany(User, { through: Members })
 
 /**
  * Create and manage accounts for users
@@ -406,7 +406,7 @@ class Account {
 
             return user.toJSON();
         } catch (error) {
-           // console.error("Error creating account:", error);
+            // console.error("Error creating account:", error);
             return false;
         }
     }
@@ -522,7 +522,7 @@ class Account {
                 return false;
             }
             let a = await User.update({ username: newUsername }, { where: { username }, limit: 1 });
-            if(a[0] == 1){
+            if (a[0] == 1) {
                 await Log.createMessage("Acccount  username was changed", (await Account.getId(newUsername)))
             }
             return a[0] == 1;
@@ -582,11 +582,47 @@ class Basic extends Account {
         let user = await User.findOne({ where: { username, type: "Basic" } });
 
 
-        if(!user) return false;
+        if (!user) return false;
 
         return bcrypt.compareSync(password, user.password);
 
 
+    }
+
+    /**
+     * gets all basic users
+     * @param {String} username The username to log in
+     * @param {String} search the username string to search
+     * @returns {Boolean} True if logged in and false otherwise
+     */
+    static async getUsers(username, search) {
+        if (!(await this.isDeleted(username))) {
+            return (await User.findAll({
+                where: 
+                { 
+                    [Op.or]: {
+                username: {[Op.like]: search},
+                email: {[Op.like]: search},
+                    },
+                type: "Basic", 
+                deletedAt: null,
+                
+            }, raw: true, attributes: {
+                    include: [
+                        "firstName",
+                        "lastName",
+                        "username"
+                    ],
+                    exclude: [
+                        "updatedAt",
+                        "createdAt",
+                        "deletedAt",
+                        "password"
+                    ]
+                }
+            })) || false;
+        }
+        return false
     }
 }
 
@@ -622,11 +658,11 @@ class Admin extends Account {
 
 
     }
-/**
- * this function restores account, using the Account version
- * @param {String} username the username of the basic user to restore
- * @see Acccount.restoreAccount
- */
+    /**
+     * this function restores account, using the Account version
+     * @param {String} username the username of the basic user to restore
+     * @see Acccount.restoreAccount
+     */
     static async restore(username) {
         return await this.restoreAccount(username);
     }
@@ -662,8 +698,8 @@ class File extends Basic {
         super();
 
 
-        File.isValid(username).then(function(bool) {
-            if(!bool)  throw new Error("the given account can not modify files")
+        File.isValid(username).then(function (bool) {
+            if (!bool) throw new Error("the given account can not modify files")
         })
 
         this.username = username;
@@ -674,81 +710,81 @@ class File extends Basic {
      * @param {String} username the username of the user to access
      * @returns {Boolean} true if the user is authorized to have files and false otherwise
      */
-    static async isValid (username) {
-        if ( (await super.isDeleted(username) ) ) return false; // checks if the user exists
-        else if( !(await User.findOne({where: {username, type:"Basic"}}) ) ) return false; // check if user is Basic
+    static async isValid(username) {
+        if ((await super.isDeleted(username))) return false; // checks if the user exists
+        else if (!(await User.findOne({ where: { username, type: "Basic" } }))) return false; // check if user is Basic
 
         return true;
     }
 
-        /**
- * Check if the file has been deleted.
- * @param {String} fileName the name of the file to check
- * @returns {Boolean} True if the file has been deleted, false otherwise.
- */
-        async isDeleted(fileName) {
-            try {    
-                let file = await Files.findOne({ where: { [Op.or]: {name: fileName, originalname: fileName}, deletedAt: { [Op.ne]: [null] } } });
+    /**
+* Check if the file has been deleted.
+* @param {String} fileName the name of the file to check
+* @returns {Boolean} True if the file has been deleted, false otherwise.
+*/
+    async isDeleted(fileName) {
+        try {
+            let file = await Files.findOne({ where: { [Op.or]: { name: fileName, originalname: fileName }, deletedAt: { [Op.ne]: [null] } } });
 
-                return file != null;
-            } catch (error) {
-                console.error("Error checking if account is deleted:", error);
-                return false;
-            }
+            return file != null;
+        } catch (error) {
+            console.error("Error checking if account is deleted:", error);
+            return false;
         }
-    
-        /**
-         * delets a file softly
-         * @param {integer} fileId the id of a file to delete
-         * @returns {boolean} true if the file is deleted
-         */
-        async deleteFile(fileId) {
-            try {
-    
-                await Files.destroy({ where: { id: fileId } });
+    }
 
-                await Log.createMessage("a file was deleted", (await Account.getId(this.username)), fileId)
+    /**
+     * delets a file softly
+     * @param {integer} fileId the id of a file to delete
+     * @returns {boolean} true if the file is deleted
+     */
+    async deleteFile(fileId) {
+        try {
 
-                return true;
-            } catch (error) {
-                console.error("Error deleting account:", error);
-                return false;
-            }
+            await Files.destroy({ where: { id: fileId } });
+
+            await Log.createMessage("a file was deleted", (await Account.getId(this.username)), fileId)
+
+            return true;
+        } catch (error) {
+            console.error("Error deleting account:", error);
+            return false;
         }
+    }
 
-            /**
-         * restores deleted file
-         * @param {integer} fileId the id of a file to restore
-         * @returns {boolean} true if the file is restored
-         */
-            async restoreFile(fileId) {
-                try {
-                    await Files.restore({ where: { id: fileId } });
-    
-                    await Log.createMessage("a file was restored", (await Account.getId(this.username)), fileId)
-
-                    return true;
-                } catch (error) {
-                    console.error("Error restoring account:", error);
-                    return false;
-                }
-            }
-
-/**
- * this function creates file for users.
- * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
- * @param {String} mimetype the files minetype
- * @param {integer} size the size of a file
- * @param {String} originalname the original name of the file to be created
- * @param {String | null} name either the original name of the file or a custum alias for the file
- * @param {Blob} data the file as a blob to be added to the array
- * @returns {Boolean} true if the file was added successfully;
+    /**
+ * restores deleted file
+ * @param {integer} fileId the id of a file to restore
+ * @returns {boolean} true if the file is restored
  */
+    async restoreFile(fileId) {
+        try {
+            await Files.restore({ where: { id: fileId } });
+
+            await Log.createMessage("a file was restored", (await Account.getId(this.username)), fileId)
+
+            return true;
+        } catch (error) {
+            console.error("Error restoring account:", error);
+            return false;
+        }
+    }
+
+    /**
+     * this function creates file for users.
+     * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
+     * @param {String} mimetype the files minetype
+     * @param {integer} size the size of a file
+     * @param {String} originalname the original name of the file to be created
+     * @param {String | null} name either the original name of the file or a custum alias for the file
+     * @param {Blob} data the file as a blob to be added to the array
+     * @returns {Boolean} true if the file was added successfully;
+     */
     async fileCreate(encoding, mimetype, size, originalname, data, name = null) {
         let username = this.username;
         try {
-            if( (await Account.isDeleted(username) )) return false;
-            let u = await User.findOne({where:{username}});
+            if ((await Account.isDeleted(username))) return false;
+            let u = await User.findOne({ where: { username } });
 
             // Count files with the same originalname prefix
             let id = await Account.getId(username);
@@ -756,14 +792,14 @@ class File extends Basic {
 
             // Create file entry
             let f;
-            if( count > 0 ) {
-                f = await Files.create({ encoding, mimetype, size, originalname: originalname+"-"+ count, name, data });
+            if (count > 0) {
+                f = await Files.create({ encoding, mimetype, size, originalname: originalname + "-" + count, name, data });
             } else {
                 f = await Files.create({ encoding, mimetype, size, originalname, name, data });
             }
-      
 
-           
+
+
             await f.setUser(u)
 
             await Log.createMessage("a new file was created", id, f.id)
@@ -783,7 +819,7 @@ class File extends Basic {
      * @returns {integer} the amout of files %(like) a filename
      */
 
-    async countFiles( userId, fileName ) {
+    async countFiles(userId, fileName) {
         // Count files with the same originalname prefix
         const { count } = await Files.findAndCountAll({
             where: {
@@ -803,14 +839,14 @@ class File extends Basic {
      * @param {String} username the username of the account to get information
      * @returns {ArrayList<JSON>} returns a list of the found file
      */
-    static async getAllFiles (username, room = null) {
+    static async getAllFiles(username, room = null) {
         let userId = await Account.getId(username);
-        let roomId = room ? (await Groups.getRoom(room) )  : null
+        let roomId = room ? (await Groups.getRoom(room)) : null
         roomId <= 0 ? null : roomId;
 
-        
+
         let files = await Files.findAll({
-            where: { userId, roomId},
+            where: { userId, roomId },
             attributes: { exclude: ['encoding', 'userId', 'data'] },
             raw: true,
             paranoid: false
@@ -819,23 +855,23 @@ class File extends Basic {
         // return  c.value + c.unit
 
         return files.map((json) => {
-           // let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
-           let d = byteSize(json.size) 
-           json.size =  d.value + d.unit;
+            // let { id, mimetype, size, originalname, name, createdAt, updatedAt } = json
+            let d = byteSize(json.size)
+            json.size = d.value + d.unit;
 
-            json.createdAt =  SQLDate( json.createdAt.toString() );
-            json.updatedAt = SQLDate( json.updatedAt.toString() );
+            json.createdAt = SQLDate(json.createdAt.toString());
+            json.updatedAt = SQLDate(json.updatedAt.toString());
 
-            if( sameDateds(json.createdAt, json.updatedAt) ){
+            if (sameDateds(json.createdAt, json.updatedAt)) {
                 json.updatedAt = "The same as the creation time"
             } else {
-                json.updatedAt = lineDate( json.updatedAt );
+                json.updatedAt = lineDate(json.updatedAt);
             }
 
-            json.createdAt =  lineDate(json.createdAt);
+            json.createdAt = lineDate(json.createdAt);
 
 
-            json.wasDeleted =  (json.deletedAt == null) ? "No" : "Yes"
+            json.wasDeleted = (json.deletedAt == null) ? "No" : "Yes"
             delete json.deletedAt;
 
 
@@ -846,20 +882,20 @@ class File extends Basic {
 
     async getSize() {
         let userId = await Account.getId(this.username);
-        let json = byteSize(await Files.sum("size", {where: {userId}}))
+        let json = byteSize(await Files.sum("size", { where: { userId } }))
 
         return json.value + " " + json.long;
     }
 
- /**
-  * gets a users file by the file id
-  * @param {String} id the file id to fetch
-  * @returns {JSON | null} gets the file; however if no file is found, then null is returned
-  */
-    async getFile (id) {
+    /**
+     * gets a users file by the file id
+     * @param {String} id the file id to fetch
+     * @returns {JSON | null} gets the file; however if no file is found, then null is returned
+     */
+    async getFile(id) {
         let userId = await Account.getId(this.username);
 
-        return await Files.findByPk(id, {where: userId,  paranoid: false, raw: true})
+        return await Files.findByPk(id, { where: userId, paranoid: false, raw: true })
     }
 
     /**
@@ -868,7 +904,7 @@ class File extends Basic {
      * @param {String} newName the new file name to change to
      * @returns {boolean} true if the file was changed
      */
-    async fileRename ( id, newName) {
+    async fileRename(id, newName) {
         let username = this.username;
 
         try {
@@ -876,7 +912,7 @@ class File extends Basic {
                 return false;
             }
             let file = await Files.findByPk(id);
-            if(file == null) return false;
+            if (file == null) return false;
 
             file.name = newName;
 
@@ -900,27 +936,27 @@ class Groups {
      * @returns {Boolean} true if room was added successfully
      */
     static async createRoom(...users) {
-        if( (await this.isRoom(...users)) ) return false;
+        if ((await this.isRoom(...users))) return false;
 
-        let room = await Rooms.create({name: Math.random().toString(36).substring(2,7) });
+        let room = await Rooms.create({ name: Math.random().toString(36).substring(2, 7) });
 
         let roomPeople = users.filter(async username => {
-            return !(await Account.isDeleted(username)) 
+            return !(await Account.isDeleted(username))
         })
 
-        roomPeople = await Promise.all( roomPeople );
+        roomPeople = await Promise.all(roomPeople);
 
         roomPeople = roomPeople.map(async (username, index) => {
             let userId = await Account.getId(username);
-            if( index === 0 ){
-                return {userId, roomId: room.id, place: 2, switch: 1}
+            if (index === 0) {
+                return { userId, roomId: room.id, place: 2, switch: 1 }
             } else {
-                return {userId, roomId: room.id}
+                return { userId, roomId: room.id }
             }
-            
+
         })
 
-        roomPeople = await Promise.all( roomPeople );
+        roomPeople = await Promise.all(roomPeople);
 
 
         try {
@@ -930,13 +966,13 @@ class Groups {
             return false
         }
     }
-/**
- * this function gets the id of a room by its name
- * @param {Strign} name The name of the room
- * @returns {integer} n > 0 if the room exists and -1 otherwise
- */
-    static async getRoom (name) {
-        let r = await Rooms.findOne({where: {name: name}})
+    /**
+     * this function gets the id of a room by its name
+     * @param {Strign} name The name of the room
+     * @returns {integer} n > 0 if the room exists and -1 otherwise
+     */
+    static async getRoom(name) {
+        let r = await Rooms.findOne({ where: { name: name } })
 
         return r != null ? r.id : -1
     }
@@ -946,35 +982,35 @@ class Groups {
      * @param  {...String} users a list of usernames to be added to a room
      * @returns {Boolean} true if the room already exists
      */
-    static async isRoom (...users) {
+    static async isRoom(...users) {
         let userIds = users.map(async username => {
             let userId = await Account.getId(username);
             return userId
         })
-        let rooms = (await Rooms.findAll({raw: true})).map( x => x.id )
+        let rooms = (await Rooms.findAll({ raw: true })).map(x => x.id)
 
 
         userIds = await Promise.all(userIds);
 
 
-        for(let room of rooms) {
-            let {count, rows} = await Members.findAndCountAll({
+        for (let room of rooms) {
+            let { count, rows } = await Members.findAndCountAll({
                 where: {
-                    roomId:room, //rooms[0]
-                    [Op.or]: {userId: userIds}
+                    roomId: room, //rooms[0]
+                    [Op.or]: { userId: userIds }
                 },
                 raw: true,
-               });
+            });
 
-               
-               if( rows.length === users.length ){
+
+            if (rows.length === users.length) {
                 return true
-               } else {
+            } else {
                 continue;
-               }
+            }
         }
         return false;
-        
+
 
     }
 
@@ -985,13 +1021,13 @@ class Groups {
      * @param {0 | 1 | 2} place the users accout status
      * @returns {boolean} true if the room was successfully joined
      */
-    static async append(roomId,username, place = 0) {
+    static async append(roomId, username, place = 0) {
         let userId = await Account.getId(username);
 
-        if( place < 0 || place >2 ) place = 0;
+        if (place < 0 || place > 2) place = 0;
         try {
-        await Members.create({userId, roomId: roomId, place})
-        return true
+            await Members.create({ userId, roomId: roomId, place })
+            return true
         } catch (e) {
             return false;
         }
@@ -1003,11 +1039,11 @@ class Groups {
      * @param {String} username the username of the single user to remove from the room
      * @returns {boolean} true if the room was successfully left
      */
-    static async pop(roomId,username) {
+    static async pop(roomId, username) {
         let userId = await Account.getId(username);
 
         try {
-            return (await Members.destroy({where: {roomId, userId}})) == 1
+            return (await Members.destroy({ where: { roomId, userId } })) == 1
         } catch (e) {
             return false;
         }
@@ -1021,46 +1057,48 @@ class Groups {
     static async myRooms(username) {
         let userId = await Account.getId(username);
 
-        if(!userId) return null;
+        if (!userId) return null;
 
-        let memb = await Members.findAll({where: {userId}, raw: true})
-        memb = [...new Set( memb.map(room => room.roomId) )]
+        let memb = await Members.findAll({ where: { userId }, raw: true })
+        memb = [...new Set(memb.map(room => room.roomId))]
 
-        let res = await Members.findAll({where: {roomId: {[Op.or]: memb} }, raw: true} );
+        let res = await Members.findAll({ where: { roomId: { [Op.or]: memb } }, raw: true });
 
-        res = await Promise.all(res.map( async (row, index) => {
-            var {userId, roomId} = row;
+        res = await Promise.all(res.map(async (row, index) => {
+            var { userId, roomId } = row;
             let joined = row.switch;
 
-            if(joined == 2) res[index].switch = true 
-            else if(joined == 1) res[index].switch = false;
+            if (joined == 2) res[index].switch = true
+            else if (joined == 1) res[index].switch = false;
             else res[index].switch = null;
 
             let user = await User.findByPk(userId);
-            let room = await Rooms.findByPk(roomId, {attributes: {
-                exclude: ["createdAt", "updatedAt", "deletedAt"]
-            }});
+            let room = await Rooms.findByPk(roomId, {
+                attributes: {
+                    exclude: ["createdAt", "updatedAt", "deletedAt"]
+                }
+            });
 
-            
 
 
-            return {user: {firstName: user.firstName, lastName: user.lastName, username: user.username}, name: room.name, joined: res[index].switch }
+
+            return { user: { firstName: user.firstName, lastName: user.lastName, username: user.username }, name: room.name, joined: res[index].switch }
         }));
 
 
         let json = {};
-        for(let row of res) {
+        for (let row of res) {
             let u = {}
-            if( Object.keys(json).includes(row.name) ){
+            if (Object.keys(json).includes(row.name)) {
                 u.user = row.user
                 u.joined = row.joined
-                json[row.name].push( u )
+                json[row.name].push(u)
             } else {
                 json[row.name] = [];
-                
+
                 u.user = row.user
                 u.joined = row.joined
-                json[row.name].push( u )
+                json[row.name].push(u)
 
             }
         }
@@ -1076,65 +1114,65 @@ class Groups {
      * @param {0 | 1 | 2} newPlace the users accout status
      * @returns {boolean} true if the user placeId was changed
      */
-    static async changeMember (roomId, username, newPlace) {
+    static async changeMember(roomId, username, newPlace) {
         let userId = await Account.getId(username);
-        
-        let a = await Members.find({where: {roomId, userId}})
 
-        if(!a) return false;
-        
+        let a = await Members.find({ where: { roomId, userId } })
+
+        if (!a) return false;
+
         a.place = newPlace;
 
         a.save();
         return true;
     }
 
-/**
- * this function creates file for users.
- * @param {number} roomId the id of the room to join
- * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
- * @param {String} mimetype the files minetype
- * @param {integer} size the size of a file
- * @param {String} originalname the original name of the file to be created
- * @param {String | null} name either the original name of the file or a custum alias for the file
- * @param {Blob} data the file as a blob to be added to the array
- * @returns {Boolean} true if the file was added successfully;
- */
-static async fileCreate(roomId, encoding, mimetype, size, originalname, data, name = null) {
-    try {
-        let u = await Rooms.findByPk(roomId);
+    /**
+     * this function creates file for users.
+     * @param {number} roomId the id of the room to join
+     * @param {String} encoding the files encoding style. THis dose not matter right now, but cirten file types could be utf8 
+     * @param {String} mimetype the files minetype
+     * @param {integer} size the size of a file
+     * @param {String} originalname the original name of the file to be created
+     * @param {String | null} name either the original name of the file or a custum alias for the file
+     * @param {Blob} data the file as a blob to be added to the array
+     * @returns {Boolean} true if the file was added successfully;
+     */
+    static async fileCreate(roomId, encoding, mimetype, size, originalname, data, name = null) {
+        try {
+            let u = await Rooms.findByPk(roomId);
 
-        // Count files with the same originalname prefix
+            // Count files with the same originalname prefix
 
-        // Create file entry
-        let  f = await Files.create({ encoding, mimetype, size, originalname, name, data});
-       
-        await f.setRoom(u)
+            // Create file entry
+            let f = await Files.create({ encoding, mimetype, size, originalname, name, data });
 
-        return true;
-    } catch (error) {
-        console.error('Error in fileCreate:', error);
-        return false; // Return null on error
+            await f.setRoom(u)
+
+            return true;
+        } catch (error) {
+            console.error('Error in fileCreate:', error);
+            return false; // Return null on error
+        }
     }
-}
 
-/**
- * update a users acount to either joined on not joined
- * @param {number} roomId the id of the room to join
- * @param {String} username the username of the single user
- * @param {number | 1} switchValue the value to switch a user join status
- * @returns 
- */
-    static async join (roomId, username, switchValue = 1) {
-                
+    /**
+     * update a users acount to either joined on not joined
+     * @param {number} roomId the id of the room to join
+     * @param {String} username the username of the single user
+     * @param {number | 1} switchValue the value to switch a user join status
+     * @returns 
+     */
+    static async join(roomId, username, switchValue = 1) {
+
         let userId = await Account.getId(username);
 
-        if(!userId) return false;
+        if (!userId) return false;
 
-        try{ 
-            await Members.update({switch: switchValue}, {where: {roomId, userId} })
+        try {
+            await Members.update({ switch: switchValue }, { where: { roomId, userId } })
             return true
-        } catch(e) {
+        } catch (e) {
             return false;
         }
     }
@@ -1154,13 +1192,13 @@ static async fileCreate(roomId, encoding, mimetype, size, originalname, data, na
 */
 
     with (Groups) {
-        await createRoom("a","b");
-        await createRoom("b","c");
-        await createRoom("a","c");
+        await createRoom("a", "b");
+        await createRoom("b", "c");
+        await createRoom("a", "c");
 
-        await createRoom("c","a");
+        await createRoom("c", "a");
 
-     //  console.log( (await getRoom("a", "b") ))
+        //  console.log( (await getRoom("a", "b") ))
     }
 })()
 
