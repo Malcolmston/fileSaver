@@ -108,6 +108,30 @@ app.get('/api/v1/users', async (req, res) => {
 
 })
 
+app.get("/getRooms", async (req, res) => {
+    let username = req.session.username;
+
+    if (!username) {
+        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    }
+
+    try {
+        let r = await Groups.myRooms(username)
+        let reqT = [];
+
+        for(let row in r){
+            reqT.push( row )
+        }
+
+
+
+        res.status(200).json({arr:reqT})
+    } catch (e) {
+        res.status(500).json({message: "A error has occerd on the server end", ok: false})
+    }
+
+})
+
 
 app.all("/login", async (req, res) => {
     let { username, password } = req.body
