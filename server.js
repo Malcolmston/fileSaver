@@ -90,6 +90,24 @@ app.get('/api/v1/getFile', async (req, res) => {
     }
 })
 
+app.get('/api/v1/users', async (req, res) => {
+    let {username, search} = req.query;
+
+
+    if (!username) {
+        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    } 
+    try {
+        let all = (await Basic.getUsers(username, search))
+    res.status(200).json(all);
+    } catch (err) {
+        console.log( err)
+        res.status(500).json({message: err.message, ok: false});
+    }
+   
+
+})
+
 
 app.all("/login", async (req, res) => {
     let { username, password } = req.body
