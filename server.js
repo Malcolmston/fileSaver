@@ -345,6 +345,70 @@ app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
 
 });
 
+app.post('/room/fileupload', upload.array('file', 100), async (req, res) => {
+    let username = "b";//req.session.username
+    let room = req.body.room
+
+    if (!username) {
+        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    } else if( !room ){
+        res.status(400).json({ message: "you must select a room this feture", ok: false });
+  
+    }
+
+    try {
+        let roomId = await Groups.getRoom( room )
+
+        if( roomId <= 0){
+            res.status(401).json({ message: "you must select a valid room this feture", ok: false });      
+        }
+
+        let ans = true;
+
+        for (let file of req.files) {
+            let { encoding, mimetype, size, originalname } = file;
+
+            let f_blob;
+            if (Object.keys(file).includes("buffer")) {
+
+                f_blob = file.buffer
+
+            } else {
+                let path = file.path;
+                let fileBuffer = fs.readFileSync(path);
+
+                // Delete the temporary file
+                fs.unlinkSync(path);
+
+                f_blob = fileBuffer
+            }
+
+            let r = await Groups.fileCreate(roomId,encoding, mimetype, size, originalname, f_blob)
+            
+
+
+
+            if (!r) {
+                ans = false;
+                break;
+            } else {
+                continue;
+            }
+
+        }
+
+        if (ans) {
+            res.status(200).redirect('/login');
+        } else {
+            res.status(402).render('basic', { username, message: `Error uploading a file` });
+        }
+    } catch (e) {
+        console.error("500 fail -> "+e);
+        res.status(500).render('basic', { username, message: 'Error uploading file.' });
+    }
+
+});
+
 app.put("/change/fname", async (req, res) => {
     let username = req.session.username
     let fname = req.body.fname;
