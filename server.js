@@ -171,6 +171,30 @@ app.get("/myRooms", async (req, res) => {
     }
 })
 
+app.get("/api/v1/roomFiles", async (req, res) => {
+    let { username, room, json } = req.query
+    if (!username) return;
+
+    const file = (new File(username));
+
+    json = (json == "true"? true : false)
+
+    try {
+
+        let files = JSON.stringify((await File.getAllFiles(null, room)))
+        let size = (await file.getSize());
+        if (json) {
+            res.json({ files })
+        } else {
+            res.render("./basic_tabs/fileHandle", {username, files, size})
+        }
+
+    } catch (e) {
+        console.error(e)
+        res.status(500).json({ message: "the given username is not valid", ok: false })
+    }
+})
+
 
 app.all("/login", async (req, res) => {
     let { username, password } = req.body
