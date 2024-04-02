@@ -346,7 +346,7 @@ app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
 });
 
 app.post('/room/fileupload', upload.array('file', 100), async (req, res) => {
-    let username = "b";//req.session.username
+    let username = req.session.username
     let room = req.body.room
 
     if (!username) {
@@ -567,7 +567,7 @@ app.put("/api/v1/fileRestore", async (req, res) => {
 })
 
 app.put("/joinRoom/:room", async (req, res) => {
-    let username = "b";
+    let username = req.session.username;
       let room = req.params.room;
   
   
@@ -582,7 +582,7 @@ app.put("/joinRoom/:room", async (req, res) => {
   })
   
   app.put("/cancelRoom/:room", async (req, res) => {
-      let username = "b";
+      let username = req.session.username;
         let room = req.params.room;
     
     
