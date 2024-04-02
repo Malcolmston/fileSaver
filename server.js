@@ -566,6 +566,37 @@ app.put("/api/v1/fileRestore", async (req, res) => {
     }
 })
 
+app.put("/joinRoom/:room", async (req, res) => {
+    let username = "b";
+      let room = req.params.room;
+  
+  
+      let r = await Groups.getRoom(room);
+      if(r >= 1 ){
+          if( (await Groups.join(r,username)) ){
+              res.status(200).json({message: "good", ok: true});
+          } else {
+              res.status(400).json({message: "bad", ok: false})
+          }
+      }
+  })
+  
+  app.put("/cancelRoom/:room", async (req, res) => {
+      let username = "b";
+        let room = req.params.room;
+    
+    
+        let r = await Groups.getRoom(room);
+        if(r >= 1 ){
+            if( (await Groups.join(r,username, 0)) ){
+              res.status(200).json({message: "good", ok: true});
+                    } else {
+                      res.status(400).json({message: "bad", ok: false})
+            }
+        }
+    })
+  
+
 app.delete("/deleteAccount", async (req, res) => {
     let username = req.session.username;
 
