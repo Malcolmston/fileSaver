@@ -132,6 +132,45 @@ app.get("/getRooms", async (req, res) => {
 
 })
 
+app.get("/myRooms", async (req, res) => {
+    let username = req.session.username;
+
+    if (!username) {
+        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    }
+
+    try {
+        let r = await Groups.myRooms(username)
+        let reqT = {};
+
+        for(let row in r){
+            reqT[row] = []
+            let people =r[row];
+            for(let person of people){
+                with(person){
+                    if(user.username == username){
+                        reqT[row].push(
+                            (joined === null ? `<span> you </span> <input type='button' value='join' class='${row} join'/> <input type='button' value='cancel' class='${row} cancel'/>` : "you have joined")
+                        );
+                        
+                       
+                    } else if( joined === true && user.username != username) {
+                        reqT[row].push( `${user.firstName} ${user.lastName} has joined` );
+                    } else if(  user.username != username && !joined ){
+                        reqT[row].push( `${user.firstName} ${user.lastName} has not joined` );
+                    }
+                }
+            }
+        }
+
+
+
+        res.status(200).render("roomGroup", {rooms: JSON.stringify(reqT) } )
+    } catch (e) {
+        res.status(500).json({message: "A error has occerd on the server end", ok: false})
+    }
+})
+
 
 app.all("/login", async (req, res) => {
     let { username, password } = req.body
