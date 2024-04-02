@@ -595,7 +595,22 @@ app.put("/joinRoom/:room", async (req, res) => {
             }
         }
     })
-  
+    app.put("/room/createNew", async (req, res) => {
+        let user = req.body.users
+    
+        if(!user) res.status(400).json({message: "invalid list of users", ok: false});
+        let c = (await Promise.all( user.map((user) =>  Basic.isDeleted(user) ) )).filter(x => !x);
+        if(c.length != user.length) res.status(400).json({message: "one of the given users is invalid", ok: false});
+    
+        try {
+            let r = await Groups.createRoom(...user);
+    
+            if(!r) res.status(404).json({message:"Room already exists", ok: false});
+            else if(r) res.status(200).json({message: "Room created", ok: true});
+        } catch (e) {
+            res.status(500).json({message: "Room creation error", ok: false});
+        }
+      })  
 
 app.delete("/deleteAccount", async (req, res) => {
     let username = req.session.username;
