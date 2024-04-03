@@ -37,6 +37,34 @@ app.get("/", async (req, res) => {
 
 })
 
+app.get("/myFiles/:room",  async (req, res) => {
+    let room = req.params.room;
+    let username = req.session.username;
+
+
+
+    try {
+        let userId = await Basic.getId(username);
+        let roomId = await Groups.getRoom(room);
+    
+        if (!userId) {
+            res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+        } else if (roomId <= 0) {
+            res.status(403).json({ message: "you must select a valid room", ok: false });
+        }
+
+        let files = JSON.stringify((await File.getAllFiles(null, room)))
+
+        let size = 0//(await file.getSize());
+        res.render("./basic_tabs/fileHandle", {username, files, size})
+        
+
+    } catch (e) {
+        console.error(e)
+        res.status(500).json({ message: "the given username is not valid", ok: false })
+    }
+}) 
+
 app.get("/api/v1/myFiles", async (req, res) => {
     let { username, json } = req.query
     if (!username) return;
@@ -108,6 +136,23 @@ app.get('/api/v1/users', async (req, res) => {
 
 })
 
+app.get("/room/open/:room", async (req, res) => {
+    let room = req.params.room;
+    let username = req.session.username;
+
+    let userId = await Basic.getId(username);
+    let roomId = await Groups.getRoom(room);
+
+
+    if (!userId) {
+        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    } else if (roomId <= 0) {
+        res.status(403).json({ message: "you must select a valid room", ok: false });
+    }
+
+    res.status(200).render("rooms", {username, room})
+})
+
 app.get("/getRooms", async (req, res) => {
     let username = req.session.username;
 
@@ -132,11 +177,17 @@ app.get("/getRooms", async (req, res) => {
 
 })
 
-app.get("/myRooms", async (req, res) => {
+app.get("/myRooms/:room", async (req, res) => {
+    let room = req.params.room;
     let username = req.session.username;
 
-    if (!username) {
+    let userId = await Basic.getId(username);
+    let roomId = await Groups.getRoom(room);
+
+    if (!userId) {
         res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+    } else if (roomId <= 0) {
+        res.status(403).json({ message: "you must select a valid room", ok: false });
     }
 
     try {
@@ -144,6 +195,7 @@ app.get("/myRooms", async (req, res) => {
         let reqT = {};
 
         for(let row in r){
+            if( row == room){
             reqT[row] = []
             let people =r[row];
             for(let person of people){
@@ -161,6 +213,7 @@ app.get("/myRooms", async (req, res) => {
                     }
                 }
             }
+        }
         }
 
 
@@ -345,23 +398,26 @@ app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
 
 });
 
-app.post('/room/fileupload', upload.array('file', 100), async (req, res) => {
+app.post('/room/fileupload/:room', upload.array('file', 100), async (req, res) => {
     let username = req.session.username
-    let room = req.body.room
+    let room = req.params.room
 
-    if (!username) {
-        res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
-    } else if( !room ){
-        res.status(400).json({ message: "you must select a room this feture", ok: false });
-  
+    if( username === undefined || room === undefined ) {
+        return res.status(403).json({ message: "input valid data", ok: false });
     }
 
     try {
-        let roomId = await Groups.getRoom( room )
+        let userId = await Basic.getId(username);
+        let roomId = await Groups.getRoom(room);
 
-        if( roomId <= 0){
-            res.status(401).json({ message: "you must select a valid room this feture", ok: false });      
+
+
+        if (!userId) {
+            return res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+        } else if (roomId <= 0) {
+            return res.status(401).json({ message: "you must select a valid room", ok: false });
         }
+
 
         let ans = true;
 
@@ -382,11 +438,7 @@ app.post('/room/fileupload', upload.array('file', 100), async (req, res) => {
 
                 f_blob = fileBuffer
             }
-
             let r = await Groups.fileCreate(roomId,encoding, mimetype, size, originalname, f_blob)
-            
-
-
 
             if (!r) {
                 ans = false;
@@ -398,13 +450,13 @@ app.post('/room/fileupload', upload.array('file', 100), async (req, res) => {
         }
 
         if (ans) {
-            res.status(200).redirect('/login');
+            return res.status(200).json({message: `good`,ok: true});//.redirect('/login');
         } else {
-            res.status(402).render('basic', { username, message: `Error uploading a file` });
+            return res.status(402).json({message: `Error uploading a file`,ok: false});
         }
     } catch (e) {
         console.error("500 fail -> "+e);
-        res.status(500).render('basic', { username, message: 'Error uploading file.' });
+        return res.status(500).json({ username, message: 'Error uploading file.',ok: false});
     }
 
 });

@@ -5,10 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="./dropZone.css" rel="stylesheet" type="text/css">
+  <link href="/dropZone.css" rel="stylesheet" type="text/css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
 
     <style>
         [role="tabpanel"] 
@@ -50,7 +49,7 @@
     <div class="tab-content" id="v-pills-tabContent">
       <div class="tab-pane fade show active" id="v-pills-runHub" role="tabpanel" aria-labelledby="v-pills-runHub-tab"
         tabindex="0">
-        <iframe src="/myRooms"></iframe>
+        <iframe src="/myRooms/<%= room %>"></iframe>
       </div>
 
       <div class="tab-pane fade" id="v-pills-file" role="tabpanel" aria-labelledby="v-pills-file-tab" tabindex="0">
@@ -74,15 +73,7 @@
 
 
       <div class="tab-pane fade" id="v-pills-gfile" role="tabpanel" aria-labelledby="v-pills-gfile-tab" tabindex="0">
-        <fieldset>
-          <legend>Select a room:</legend>
-          <div class="roomPlaceholder"></div>
-
-        </fieldset>
-
-        <iframe id="myFiles"></iframe>
-
-
+        <iframe src="/myFiles/<%= room %>"></iframe>
       </div>
 
       <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab" tabindex="0">
@@ -117,272 +108,247 @@
       <script src="https://kit.fontawesome.com/fd76b8450f.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script type="text/javascript" src="/table.js"></script>
+      <script type="text/javascript">
+        let formData = new FormData();
+const toast_message = {
+  Toast: Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  }),
+
+  error: function (message) {
+    this.Toast.fire({
+      icon: "error",
+      title: message
+    });
+  },
+
+  success: function (message) {
+    this.Toast.fire({
+      icon: "success",
+      title: message
+    });
+  }
+
+}
+
+function icon(type) {
+  switch (type) {
+    case "txt":
+      return "https://cdn-icons-png.flaticon.com/512/4248/4248224.png";
+    case "png":
+      return "https://cdn-icons-png.flaticon.com/512/8243/8243033.png";
+    case "svg":
+    case "svg+xml":
+      return "https://cdn-icons-png.flaticon.com/512/5063/5063253.png";
+    case "jpeg":
+      return "https://cdn-icons-png.flaticon.com/512/7858/7858983.png";
+    case "obj":
+      return "https://cdn-icons-png.flaticon.com/512/29/29536.png";
+    case "gif":
+      return "https://cdn-icons-png.flaticon.com/512/2306/2306094.png";
+    case "webp":
+      return "https://cdn-icons-png.flaticon.com/512/8263/8263118.png";
+    case "bmp":
+      return "https://cdn-icons-png.flaticon.com/512/8085/8085527.png";
+    case "ico":
+      return "https://cdn-icons-png.flaticon.com/512/1126/1126873.png";
+    case "tif":
+      return "https://cdn-icons-png.flaticon.com/512/8176/8176632.png";
+    case "sql":
+      return "https://cdn-icons-png.flaticon.com/512/4299/4299956.png";
+    case "js":
+    case "x-javascript":
+      return "https://cdn-icons-png.flaticon.com/512/8945/8945622.png";
+    case "json":
+      return "https://cdn-icons-png.flaticon.com/512/136/136525.png";
+    case "ts":
+      return "https://cdn-icons-png.flaticon.com/512/8300/8300631.png";
+    case "md":
+      return "https://cdn-icons-png.flaticon.com/512/617/617467.png";
+    case "cc":
+      return "https://cdn-icons-png.flaticon.com/512/9095/9095099.png";
+    case "cs":
+      return "https://cdn-icons-png.flaticon.com/512/2306/2306037.png";
+    case "c":
+      return "https://cdn-icons-png.flaticon.com/512/3585/3585350.png";
+    case "csv":
+      return "https://cdn-icons-png.flaticon.com/512/9159/9159105.png";
+    case "t":
+      return "https://cdn-icons-png.flaticon.com/512/4490/4490695.png";
+    case "r":
+      return "https://cdn-icons-png.flaticon.com/512/8112/8112727.png";
+    case "d":
+      return "https://cdn-icons-png.flaticon.com/512/8112/8112877.png";
+    case "h":
+      return "https://cdn-icons-png.flaticon.com/512/8112/8112548.png";
+    case "cs":
+      return "https://cdn-icons-png.flaticon.com/512/7496/7496950.png";
+    case "css":
+      return "https://cdn-icons-png.flaticon.com/128/136/136527.png";
+    case "html":
+      return "https://cdn-icons-png.flaticon.com/512/136/136528.png";
+    case "htm":
+      return "https://cdn-icons-png.flaticon.com/512/136/136528.png";
+    case "stylus":
+      return "https://cdn-icons-png.flaticon.com/512/3650/3650875.png";
+    case "sass":
+      return "https://cdn-icons-png.flaticon.com/512/919/919831.png";
+    case "php":
+      return "https://cdn-icons-png.flaticon.com/512/2306/2306154.png";
+    case "py":
+      return "https://cdn-icons-png.flaticon.com/512/3098/3098090.png";
+    case "node":
+      return "https://cdn-icons-png.flaticon.com/512/5968/5968322.png";
+    case "mp3":
+      return "https://cdn-icons-png.flaticon.com/512/2306/2306139.png";
+    case "mp4":
+      return "https://cdn-icons-png.flaticon.com/512/1719/1719843.png";
+    case "wav":
+      return "https://cdn-icons-png.flaticon.com/512/8263/8263140.png";
+    case "acc":
+      return "https://cdn-icons-png.flaticon.com/512/8300/8300275.png";
+    case "flac":
+      return "https://cdn-icons-png.flaticon.com/512/730/730567.png";
+    case "mp2":
+      return "https://cdn-icons-png.flaticon.com/512/8300/8300531.png";
+    case "mp1":
+      return "https://cdn-icons-png.flaticon.com/512/8300/8300500.png";
+    case "doc":
+      return "https://cdn-icons-png.flaticon.com/512/4725/4725970.png";
+    case "pdf":
+    case "octet-stream":
+      return "https://cdn-icons-png.flaticon.com/512/136/136522.png";
+    case "jpg":
+      return "https://cdn-icons-png.flaticon.com/512/337/337940.png";
+    case "xls":
+      return "https://cdn-icons-png.flaticon.com/512/3997/3997638.png";
+    default:
+      return "https://cdn-icons-png.flaticon.com/512/660/660726.png";
+  }
+}
+
+function dropHandler(ev) {
+  console.log("File(s) dropped");
+
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
+
+  let files = ev.dataTransfer
+
+  document.querySelector("#prevew").innerHTML = ""
+  let data = [];
+  if (files.items) {
+    let arr = [...files.items].map(item => {
+      if (item.kind === "file") {
+        return item.getAsFile();
+      } else {
+        return false;
+      }
+    }).filter(x => x)
+    handleFiles(arr)
+
+  } else {
+    // Use DataTransfer interface to access the file(s)
+    handleFiles([...files.files]);
 
 
-      <script type="text/javascript" src="./table.js"></script>
+  }
+
+
+
+}
+
+
+function dragOverHandler(ev) {
+  //console.log("File(s) in drop zone");
+
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
+}
+
+function chooseFile(ev) {
+  console.log("choosing files");
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
+
+  const inputFile = document.createElement('input');
+  inputFile.type = 'file';
+  inputFile.hidden = true;
+  inputFile.multiple = true;
+  //document.body.appendChild(inputFile);
+  inputFile.click();
+
+  inputFile.addEventListener('change', noDragFile);
+
+
+}
+
+
+
+function noDragFile(ev) {
+  const files = ev.target.files;
+
+
+  // Do something with the selected files
+  handleFiles([...files])
+
+}
+
+function handleFiles(files) {
+  let data = []
+  files.forEach((file, i) => {
+    let { name, size, type } = file
+    data.push({ name, size, type: icon(type.split('/')[1]) })
+    formData.append('file', file);
+  });
+  document.querySelector("#prevew").innerHTML = "<input type=\"submit\" value=\"Upload File\" onclick=\"submitData(event)\">";
+  let table = createDOMtable(data);
+  document.querySelector("#prevew").append(table)
+
+  return formData;
+}
+
+
+        async function submitData (ev) {
+  ev.preventDefault();
+
+
+
+  fetch('/room/fileupload/<%= room %>', {
+    method: 'POST',
+    body: formData
+  })
+    .then(data => {
+      if( data.ok){
+        toast_message.success('Files were uploaded successfully');
+      }else{
+        toast_message.error(data.message);
+      }
+      
+    })
+    .catch(error => {
+      console.error(error);
+      t
+    });
+
+  document.querySelector("#prevew").innerHTML = ""
+  formData = new FormData();
+}
+      </script>
 
       <script type="text/javascript">
         const username = "<%= username %>";
-        var currenRoom = null;
+        const room = "<%= room %>";
 
-        let formData = new FormData();
-        const toast_message = {
-          Toast: Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.onmouseenter = Swal.stopTimer;
-              toast.onmouseleave = Swal.resumeTimer;
-            }
-          }),
-
-          error: function (message) {
-            this.Toast.fire({
-              icon: "error",
-              title: message
-            });
-          },
-
-          success: function (message) {
-            this.Toast.fire({
-              icon: "success",
-              title: message
-            });
-          }
-
-        }
-
-        function icon(type) {
-          switch (type) {
-            case "txt":
-              return "https://cdn-icons-png.flaticon.com/512/4248/4248224.png";
-            case "png":
-              return "https://cdn-icons-png.flaticon.com/512/8243/8243033.png";
-            case "svg":
-            case "svg+xml":
-              return "https://cdn-icons-png.flaticon.com/512/5063/5063253.png";
-            case "jpeg":
-              return "https://cdn-icons-png.flaticon.com/512/7858/7858983.png";
-            case "obj":
-              return "https://cdn-icons-png.flaticon.com/512/29/29536.png";
-            case "gif":
-              return "https://cdn-icons-png.flaticon.com/512/2306/2306094.png";
-            case "webp":
-              return "https://cdn-icons-png.flaticon.com/512/8263/8263118.png";
-            case "bmp":
-              return "https://cdn-icons-png.flaticon.com/512/8085/8085527.png";
-            case "ico":
-              return "https://cdn-icons-png.flaticon.com/512/1126/1126873.png";
-            case "tif":
-              return "https://cdn-icons-png.flaticon.com/512/8176/8176632.png";
-            case "sql":
-              return "https://cdn-icons-png.flaticon.com/512/4299/4299956.png";
-            case "js":
-            case "x-javascript":
-              return "https://cdn-icons-png.flaticon.com/512/8945/8945622.png";
-            case "json":
-              return "https://cdn-icons-png.flaticon.com/512/136/136525.png";
-            case "ts":
-              return "https://cdn-icons-png.flaticon.com/512/8300/8300631.png";
-            case "md":
-              return "https://cdn-icons-png.flaticon.com/512/617/617467.png";
-            case "cc":
-              return "https://cdn-icons-png.flaticon.com/512/9095/9095099.png";
-            case "cs":
-              return "https://cdn-icons-png.flaticon.com/512/2306/2306037.png";
-            case "c":
-              return "https://cdn-icons-png.flaticon.com/512/3585/3585350.png";
-            case "csv":
-              return "https://cdn-icons-png.flaticon.com/512/9159/9159105.png";
-            case "t":
-              return "https://cdn-icons-png.flaticon.com/512/4490/4490695.png";
-            case "r":
-              return "https://cdn-icons-png.flaticon.com/512/8112/8112727.png";
-            case "d":
-              return "https://cdn-icons-png.flaticon.com/512/8112/8112877.png";
-            case "h":
-              return "https://cdn-icons-png.flaticon.com/512/8112/8112548.png";
-            case "cs":
-              return "https://cdn-icons-png.flaticon.com/512/7496/7496950.png";
-            case "css":
-              return "https://cdn-icons-png.flaticon.com/128/136/136527.png";
-            case "html":
-              return "https://cdn-icons-png.flaticon.com/512/136/136528.png";
-            case "htm":
-              return "https://cdn-icons-png.flaticon.com/512/136/136528.png";
-            case "stylus":
-              return "https://cdn-icons-png.flaticon.com/512/3650/3650875.png";
-            case "sass":
-              return "https://cdn-icons-png.flaticon.com/512/919/919831.png";
-            case "php":
-              return "https://cdn-icons-png.flaticon.com/512/2306/2306154.png";
-            case "py":
-              return "https://cdn-icons-png.flaticon.com/512/3098/3098090.png";
-            case "node":
-              return "https://cdn-icons-png.flaticon.com/512/5968/5968322.png";
-            case "mp3":
-              return "https://cdn-icons-png.flaticon.com/512/2306/2306139.png";
-            case "mp4":
-              return "https://cdn-icons-png.flaticon.com/512/1719/1719843.png";
-            case "wav":
-              return "https://cdn-icons-png.flaticon.com/512/8263/8263140.png";
-            case "acc":
-              return "https://cdn-icons-png.flaticon.com/512/8300/8300275.png";
-            case "flac":
-              return "https://cdn-icons-png.flaticon.com/512/730/730567.png";
-            case "mp2":
-              return "https://cdn-icons-png.flaticon.com/512/8300/8300531.png";
-            case "mp1":
-              return "https://cdn-icons-png.flaticon.com/512/8300/8300500.png";
-            case "doc":
-              return "https://cdn-icons-png.flaticon.com/512/4725/4725970.png";
-            case "pdf":
-            case "octet-stream":
-              return "https://cdn-icons-png.flaticon.com/512/136/136522.png";
-            case "jpg":
-              return "https://cdn-icons-png.flaticon.com/512/337/337940.png";
-            case "xls":
-              return "https://cdn-icons-png.flaticon.com/512/3997/3997638.png";
-            default:
-              return "https://cdn-icons-png.flaticon.com/512/660/660726.png";
-          }
-        }
-
-        function dropHandler(ev) {
-          console.log("File(s) dropped");
-
-          // Prevent default behavior (Prevent file from being opened)
-          ev.preventDefault();
-
-          let files = ev.dataTransfer
-
-          document.querySelector("#prevew").innerHTML = ""
-          let data = [];
-          if (files.items) {
-            let arr = [...files.items].map(item => {
-              if (item.kind === "file") {
-                return item.getAsFile();
-              } else {
-                return false;
-              }
-            }).filter(x => x)
-            handleFiles(arr)
-
-          } else {
-            // Use DataTransfer interface to access the file(s)
-            handleFiles([...files.files]);
-
-
-          }
-
-
-
-        }
-
-
-        function dragOverHandler(ev) {
-          //console.log("File(s) in drop zone");
-
-          // Prevent default behavior (Prevent file from being opened)
-          ev.preventDefault();
-        }
-
-        function chooseFile(ev) {
-          console.log("choosing files");
-          // Prevent default behavior (Prevent file from being opened)
-          ev.preventDefault();
-
-          const inputFile = document.createElement('input');
-          inputFile.type = 'file';
-          inputFile.hidden = true;
-          inputFile.multiple = true;
-          //document.body.appendChild(inputFile);
-          inputFile.click();
-
-          inputFile.addEventListener('change', noDragFile);
-
-
-        }
-
-
-
-        function noDragFile(ev) {
-          const files = ev.target.files;
-
-
-          // Do something with the selected files
-          handleFiles([...files])
-
-        }
-
-
-        function handleFiles(files) {
-          let data = []
-          files.forEach((file, i) => {
-            let { name, size, type } = file
-            data.push({ name, size, type: icon(type.split('/')[1]) })
-            formData.append('file', file);
-          });
-          document.querySelector("#prevew").innerHTML = "<input type=\"submit\" value=\"Upload File\" onclick=\"submitData(event)\">";
-          let table = createDOMtable(data);
-          document.querySelector("#prevew").append(table)
-
-          return formData;
-        }
-
-
-        async function submitData(ev) {
-          ev.preventDefault();
-
-          if( currenRoom == null || !currenRoom ) {
-            toast_message.error("Please select a valid room name to uplad files");
-            return;
-          }
-          formData.append("room", currenRoom)
-
-
-          fetch('/room/fileupload', {
-            method: 'POST',
-            body: formData
-          })
-            .then(data => {
-              toast_message.success('Files were uploaded successfully');
-            })
-            .catch(error => {
-              console.error(error);
-              toast_message.error('There was a problem with the fetch operation');
-            });
-
-          document.querySelector("#prevew").innerHTML = ""
-          formData = new FormData();
-        }
-
-
-        fetch("/getRooms").then(data => data.json()).then(data => {
-          let roomPlaceholder = $(".roomPlaceholder");
-          for(let name of data.arr){
-            roomPlaceholder.append(`          
-    <div>
-    <input type="radio" id="${name}" name="room" value="${name}" checked />
-    <label for="${name}">${name}</label>
-  </div>
-`);
-          }
-          $("[type='radio']").on("change", e => {
-          currenRoom = $(e.target).val() 
-
-          $("#myFiles").attr("src",`/api/v1/roomFiles?username=${username}&room=${currenRoom}`)
-        })
-
-        
-
-
-        });
-
-  
 const submit = $("#submit");
 
 const txtHint = $("#txtHint");
@@ -425,7 +391,6 @@ function showHint(txt) {
                 })
 
                 c.on("click",e => {
-                  console.log
                   div.remove();
                   
                   li.text(text);
@@ -445,7 +410,6 @@ function showHint(txt) {
 }
       
 submit.on("click", function(e){
-  let formData = new FormData();
 e.preventDefault();
 let arr = []
 

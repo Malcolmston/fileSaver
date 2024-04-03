@@ -418,7 +418,6 @@ class Account {
      */
     static async getId(username) {
         try {
-
             let user = await User.findOne({ where: { username: username } });
             return user ? user.id : null;
         } catch (error) {
@@ -1145,7 +1144,7 @@ class Groups {
             // Count files with the same originalname prefix
 
             // Create file entry
-            let f = await Files.create({ encoding, mimetype, size, originalname, name, data });
+            let f = await Files.create({ encoding, mimetype, size, originalname, data, name});
 
             await f.setRoom(u)
 

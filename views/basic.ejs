@@ -39,6 +39,11 @@
         type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Contact</button>
     </li>
 
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-rooms-tab" data-bs-toggle="pill" data-bs-target="#pills-rooms"
+        type="button" role="tab" aria-controls="pills-rooms" aria-selected="false">Rooms</button>
+    </li>
+
   </ul>
   <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
@@ -54,6 +59,16 @@
     <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
       <%- include('./basic_tabs/changeForms'); %>
     </div>
+
+    <div class="tab-pane fade" id="pills-rooms" role="tabpanel" aria-labelledby="pills-rooms-tab" tabindex="0">
+      <fieldset>
+        <legend>Select a room:</legend>
+        <div class="roomPlaceholder"></div>
+
+      </fieldset>
+
+    </div>
+
 
 
 
@@ -102,6 +117,7 @@
   integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
 <script src="https://kit.fontawesome.com/fd76b8450f.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 
 <script type="text/javascript" src="./fileHandle.js"></script>
@@ -280,6 +296,27 @@
     document.querySelector("iframe").contentWindow.location.reload();
 
   }
+
+  fetch("/getRooms").then(data => data.json()).then(data => {
+          let roomPlaceholder = $(".roomPlaceholder");
+          for(let name of data.arr){
+            roomPlaceholder.append(`          
+    <div>
+    <input type="button" id="${name}" name="room" value="${name}" />
+  </div>
+`);
+          }
+          $("[type='button']").on("click", e => {
+          let room = $(e.target).val() 
+
+          window.open("/room/open/"+room);
+         // $("#myFiles").attr("src",`/api/v1/roomFiles?username=${username}&room=${currenRoom}`)
+        })
+
+        
+
+
+        });
 </script>
 
 
