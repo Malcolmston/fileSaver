@@ -56,7 +56,7 @@ app.get("/myFiles/:room",  async (req, res) => {
         let files = JSON.stringify((await File.getAllFiles(null, room)))
 
         let size = 0//(await file.getSize());
-        res.render("./basic_tabs/fileHandle", {username, files, size})
+        return res.status(200).render("./basic_tabs/fileHandle", {username, files, size})
         
 
     } catch (e) {
