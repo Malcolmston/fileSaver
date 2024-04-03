@@ -3,7 +3,7 @@ require('dotenv').config() // adds the ability to create environment variables
 const express = require('express');
 const multer = require('multer');
 const { sessionMiddleware } = require('./router.js')
-const { Basic, Admin, File } = require('./userManegement.js');
+const { Basic, Admin, File,Groups} = require('./userManegement.js');
 
 
 const app = express();
