@@ -653,6 +653,34 @@ class Basic extends Account {
         }
         return false
     }
+
+    /**
+     * tokens can only be created by basic users
+     */
+     static #Token = class {
+
+        /**
+         * gerates a random 64 bit token
+         * @returns {Token} the newly created token
+         */
+        static key () {
+            return require('crypto').randomBytes(64).toString('hex')
+        }
+        
+        /**
+         * creates a custom token for users
+         * @returns returns a new object with the token
+         */
+        static async custom () {
+            try {
+                return await Tokens.create({
+                key: this.key()
+            })
+            } catch (e) {
+                return null;
+            }
+        }
+    }
 }
 
 /**
@@ -1208,30 +1236,6 @@ class Groups {
 
 }
 
-class Token extends Account {
-
-    /**
-     * gerates a random 64 bit token
-     * @returns {Token} the newly created token
-     */
-    static key () {
-        return require('crypto').randomBytes(64).toString('hex')
-    }
-    
-    /**
-     * creates a custom token for users
-     * @returns returns a new object with the token
-     */
-    static async custom () {
-        try {
-            return await Tokens.create({
-            key: this.key()
-        })
-        } catch (e) {
-            return null;
-        }
-    }
-}
 
 
 (async () => {
