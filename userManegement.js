@@ -586,6 +586,7 @@ class Account {
  * a more specilized virson of Accout that solly handes basic accounts
  */
 class Basic extends Account {
+
     /**
 * Signs a user up
 * @param {String} username The username to sign up
@@ -669,13 +670,10 @@ class Basic extends Account {
      * tokens can only be created by basic users
      */
      static #Token = class Token {
-        /**
-         * gerates a random 64 bit token
-         * @returns {Token} the newly created token
-         */
-        static key () {
-            return require('crypto').randomBytes(64).toString('hex')
+        static {
+            this.key = require('crypto').randomBytes(64).toString('hex');
         }
+
         
         /**
          * creates a custom token for users
@@ -685,7 +683,7 @@ class Basic extends Account {
         static async custom (username) {
             try {
                 let t = await Tokens.create({
-                key: this.key()
+                key: this.key
             })
             let a = await this.getId(username);
 
@@ -696,6 +694,8 @@ class Basic extends Account {
                 return null;
             }
         }
+
+
     }
 }
 
