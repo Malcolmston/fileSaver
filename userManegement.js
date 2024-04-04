@@ -331,6 +331,22 @@ const Members = sequelize.define("member", {
     }
 })
 
+const Tokens = sequelize.define("token", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    key: {
+        type: DataTypes.TEXT,
+        unique: true,
+        allowNull: false
+    },
+    uses: {
+      type: DataTypes.Integer,
+      default: 100  
+    }
+}, { paranoid: true })
 
 User.hasMany(Logger);
 Logger.belongsTo(User);
@@ -340,6 +356,9 @@ Files.belongsTo(User);
 
 Rooms.hasMany(Files);
 Files.belongsTo(Rooms);
+
+User.hasMany(Tokens);
+Tokens.belongsTo(User);
 
 User.belongsToMany(Rooms, { through: Members })
 Rooms.belongsToMany(User, { through: Members })
