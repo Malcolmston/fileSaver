@@ -689,6 +689,8 @@ class Basic extends Account {
             let t = await Tokens.create({
                 key: this.key
             })
+            if( await this.validate() ) return;
+
             let a = await User.findOne({where: {username: this.username}})
 
             t.setUser(a)
@@ -705,11 +707,25 @@ class Basic extends Account {
          */
         async use () {
             let username = this.username;
-            let t = await Tokens.findOne({where: {username}})
+
+            let t =  await Tokens.findOne({
+                include: { model: User, where: {username}},
+            })
+
 
             t.increment({["uses"]: {by: -1}})
+        }
 
-            //return t.getUser();
+        /**
+         * Validates a user, and gaters if the account has a valid token
+         * @returns {Boolean} true if the code is valid, false otherwise
+         */
+        async validate () {
+            let t =  await Tokens.findOne({
+                include: { model: User, where: {username: this.username}},
+            })
+
+            return t === null;
         }
 
 
@@ -1282,12 +1298,6 @@ class Groups {
 
         await generateTokens("a");
     }
-
-    console.log(
-        await Tokens.findOne({
-            include: { model: User, where: {username: "a"}},
-        })
-    )
 
     with (Groups) {
         await createRoom("a", "b");
