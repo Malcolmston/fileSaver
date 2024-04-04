@@ -1208,6 +1208,17 @@ class Groups {
 
 }
 
+class Token extends Account {
+
+    /**
+     * gerates a random 64 bit token
+     * @returns {Token} the newly created token
+     */
+    static key () {
+        return require('crypto').randomBytes(64).toString('hex')
+    }
+}
+
 
 (async () => {
     await sequelize.sync({ force: false });
