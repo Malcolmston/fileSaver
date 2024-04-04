@@ -729,6 +729,16 @@ class Basic extends Account {
             return t === null;
         }
 
+        /**
+         * gets if a token key code is valid
+         * @param {String} room a room id
+         * @returns {Boolean} true if the code is valid
+         */
+        static async validate (key) {
+            let r = await Tokens.findOne({key, raw: true});
+            return r !== null;
+        }
+
 
     }
 }
