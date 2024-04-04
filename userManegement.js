@@ -343,8 +343,8 @@ const Tokens = sequelize.define("token", {
         allowNull: false
     },
     uses: {
-      type: DataTypes.Integer,
-      default: 100  
+      type: DataTypes.INTEGER,
+      defaultValue: 100,
     }
 }, { paranoid: true })
 
@@ -655,10 +655,20 @@ class Basic extends Account {
     }
 
     /**
+     * crates a token for a users account
+     * @param {String} username The username to log in 
+     * @returns {Boolean} true if the user had a token added, false otherwise
+     */
+    static async generateTokens(username) {
+       let res = await this.#Token.custom(username);
+
+        return res !== null
+    }
+
+    /**
      * tokens can only be created by basic users
      */
-     static #Token = class {
-
+     static #Token = class Token {
         /**
          * gerates a random 64 bit token
          * @returns {Token} the newly created token
@@ -669,13 +679,19 @@ class Basic extends Account {
         
         /**
          * creates a custom token for users
+         * @param {String} username username of the user
          * @returns returns a new object with the token
          */
-        static async custom () {
+        static async custom (username) {
             try {
-                return await Tokens.create({
+                let t = await Tokens.create({
                 key: this.key()
             })
+            let a = await this.getId(username);
+
+            t.setUser(a)
+
+            return t;
             } catch (e) {
                 return null;
             }
@@ -1239,15 +1255,16 @@ class Groups {
 
 
 (async () => {
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ force: true });
 
-    /*
+    
     with (Basic) {
         await signUp("a","a","a@a", "a", "a");
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
+
+        await generateTokens("a");
     }
-*/
 
     with (Groups) {
         await createRoom("a", "b");
