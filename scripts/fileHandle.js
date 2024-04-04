@@ -191,7 +191,6 @@ function noDragFile(ev) {
 
 }
 
-
 function handleFiles(files) {
   let data = []
   files.forEach((file, i) => {
@@ -206,9 +205,9 @@ function handleFiles(files) {
   return formData;
 }
 
-
-async function submitData(ev) {
+var submitData = async function (ev) {
   ev.preventDefault();
+  ev.stopPropagation();
 
 
   fetch('/fileupload', {
