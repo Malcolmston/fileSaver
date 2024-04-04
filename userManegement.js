@@ -353,6 +353,17 @@ class Account {
     }
 
     /**
+     * gets the total amount of accounts
+     * @param {String} type the account type
+     * @returns the total amout of found users
+     */
+    static async count (type = "Basic") {
+        let {count} = await User.findAndCountAll({where: {type}})
+
+        return count;
+    }
+
+    /**
      * Check if the account exists.
      * @param {String} username The username of the account to create/look at
      * @returns {Boolean} True if the account exists, false otherwise.
@@ -911,7 +922,7 @@ class File extends Basic {
                 return false;
             }
             let file = await Files.findByPk(id);
-            if (file == null) return false;
+            if (file === null) return false;
 
             file.name = newName;
 
