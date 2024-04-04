@@ -661,31 +661,35 @@ class Basic extends Account {
      * @returns {Boolean} true if the user had a token added, false otherwise
      */
     static async generateTokens(username) {
-       let res = await this.#Token.custom(username);
+        let token = new this.Token(username);
+
+       let res = await token.custom();
 
         return res !== null
     }
 
+
     /**
      * tokens can only be created by basic users
      */
-     static #Token = class Token {
-        static {
+     static Token = class  {
+  
+        constructor (username) {
             this.key = require('crypto').randomBytes(64).toString('hex');
+            this.username = username;
         }
-
         
         /**
          * creates a custom token for users
          * @param {String} username username of the user
          * @returns returns a new object with the token
          */
-        static async custom (username) {
+        async custom () {
             try {
-                let t = await Tokens.create({
+            let t = await Tokens.create({
                 key: this.key
             })
-            let a = await this.getId(username);
+            let a = await User.findOne({where: {username: this.username}})
 
             t.setUser(a)
 
@@ -693,6 +697,19 @@ class Basic extends Account {
             } catch (e) {
                 return null;
             }
+        }
+
+        /**
+         * uses a users token
+         * @param {String} username username of the user
+         */
+        async use () {
+            let username = this.username;
+            let t = await Tokens.findOne({where: {username}})
+
+            t.increment({["uses"]: {by: -1}})
+
+            //return t.getUser();
         }
 
 
@@ -1265,6 +1282,12 @@ class Groups {
 
         await generateTokens("a");
     }
+
+    console.log(
+        await Tokens.findOne({
+            include: { model: User, where: {username: "a"}},
+        })
+    )
 
     with (Groups) {
         await createRoom("a", "b");
