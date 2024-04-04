@@ -67,11 +67,12 @@ app.get("/myFiles/:room", async (req, res) => {
 
 app.get("/api/v1/myFiles", async (req, res) => {
     let { username, json } = req.query
-    if (!username) return;
+    if (!username)  return res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+
 
     const file = (new File(username));
 
-    json = (json ? true : false)
+    json = (json == "true" ? true : false)
 
     try {
 
@@ -104,7 +105,6 @@ app.get('/api/v1/getFile', async (req, res) => {
         let f = await file.getFile(id);
         if (!f) return res.status(404).send({ message: "The chosen file dose not exist." });
 
-        console.log(f)
         if (json) {
             res.status(200).send(f)
         } else {
@@ -116,6 +116,19 @@ app.get('/api/v1/getFile', async (req, res) => {
         console.error(e);
         return res.status(500).send({ message: "Error " + e, ok: false });
     }
+})
+
+app.get("/api/v1/count",async (req, res) => {
+  
+    try {
+        let c = await Basic.count();
+        res.status(200).json(c);
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: err.message, ok: false });
+    }
+
+
 })
 
 app.get('/api/v1/users', async (req, res) => {
@@ -232,7 +245,8 @@ app.get("/myRooms/:room", async (req, res) => {
 
 app.get("/api/v1/roomFiles", async (req, res) => {
     let { username, room, json } = req.query
-    if (!username) return;
+    if (!username)  return res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
+
 
     const file = (new File(username));
 
@@ -354,7 +368,7 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
 
 });
 
-app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
+app.post('/api/v1/fileupload', upload.single("file"), async (req, res) => {
     let { username } = req.body
     let file = req.file;
 
@@ -391,7 +405,7 @@ app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
 
 
         if (!r) {
-            res.status(402).render('basic', { username, message: `Error uploading a file` });
+            res.status(402).json({ message: `Error uploading a file`, ok: false });
         } else {
             res.status(200).redirect('/login');
         }
@@ -399,7 +413,7 @@ app.post('api/v1/fileupload', upload.single("file"), async (req, res) => {
 
     } catch (e) {
         console.error(e);
-        res.status(500).render('basic', { username, message: 'Error uploading file.' });
+        res.status(500).json({message: 'Error uploading file.', ok: false });
     }
 
 });
@@ -567,7 +581,7 @@ app.put("/change/password", async (req, res) => {
 app.put("/api/v1/fileRename", async (req, res) => {
     let { username, fileId, newFileName } = req.query
 
-    if (!username || !fileId || Number(fileId) == NaN || !newFileName) res.status(406).json({ message: "you must input the valid data", ok: false });
+    if (!username  || username === undefined || !fileId || Number(fileId) == NaN || !newFileName) res.status(406).json({ message: "you must input the valid data", ok: false });
     try {
         let file = new File(username);
 
