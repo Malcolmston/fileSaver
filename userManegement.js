@@ -672,7 +672,7 @@ class Basic extends Account {
     /**
      * tokens can only be created by basic users
      */
-     static Token = class  {
+     static Token = class Token {
   
         constructor (username) {
             this.key = require('crypto').randomBytes(64).toString('hex');
@@ -689,7 +689,7 @@ class Basic extends Account {
             let t = await Tokens.create({
                 key: this.key
             })
-            if( await this.validate() ) return;
+            if( await Token.canAdd() ) return;
 
             let a = await User.findOne({where: {username: this.username}})
 
@@ -718,9 +718,10 @@ class Basic extends Account {
 
         /**
          * Validates a user, and gaters if the account has a valid token
+         * @param {String} username username of the user
          * @returns {Boolean} true if the code is valid, false otherwise
          */
-        async validate () {
+        static async canAdd (username) {
             let t =  await Tokens.findOne({
                 include: { model: User, where: {username: this.username}},
             })
@@ -1296,7 +1297,7 @@ class Groups {
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
 
-        await generateTokens("a");
+        //await generateTokens("a");
     }
 
     with (Groups) {
