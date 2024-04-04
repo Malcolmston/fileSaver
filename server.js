@@ -12,6 +12,16 @@ const upload = multer();
 
 const { PORT, HOST } = process.env;
 
+const handle = async (req, res) => {
+    let r = await Basic.Token.validate( req.headers.authorization )
+
+    if( !req.session.valid && !r){
+        res.status(405).json({message: "Invalid token", ok: false})
+        return false
+    }
+
+    return true
+}
 
 app.use(express.json({ limit: '1gb' })) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -118,11 +128,12 @@ app.get('/api/v1/getFile', async (req, res) => {
     }
 })
 
-app.get("/api/v1/count",async (req, res) => {
-  
+app.get("/api/v1/count", async (req, res) => {
     try {
-        let c = await Basic.count();
+   if( !(await handle(req, res)) ) {
+    let c = await Basic.count();
         res.status(200).json(c);
+    }
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: err.message, ok: false });
@@ -133,7 +144,7 @@ app.get("/api/v1/count",async (req, res) => {
 
 app.get('/api/v1/users', async (req, res) => {
     let { username, search } = req.query;
-
+    if( !(await handle(req, res)) ) {
 
     if (!username) {
         res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
@@ -151,6 +162,7 @@ app.get('/api/v1/users', async (req, res) => {
         console.log(err)
         res.status(500).json({ message: err.message, ok: false });
     }
+}
 
 
 })
@@ -247,7 +259,7 @@ app.get("/api/v1/roomFiles", async (req, res) => {
     let { username, room, json } = req.query
     if (!username)  return res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
 
-
+    if( !(await handle(req, res)) ) {
     const file = (new File(username));
 
     json = (json == "true" ? true : false)
@@ -266,6 +278,7 @@ app.get("/api/v1/roomFiles", async (req, res) => {
         console.error(e)
         res.status(500).json({ message: "the given username is not valid", ok: false })
     }
+}
 })
 
 
@@ -380,7 +393,7 @@ app.post('/api/v1/fileupload', upload.single("file"), async (req, res) => {
         res.status(400).json({ message: "you must submit a file", ok: false });
     }
 
-
+    if( !(await handle(req, res)) ) {
     try {
         const file_class = new File(username);
 
@@ -415,6 +428,7 @@ app.post('/api/v1/fileupload', upload.single("file"), async (req, res) => {
         console.error(e);
         res.status(500).json({message: 'Error uploading file.', ok: false });
     }
+}
 
 });
 
@@ -582,6 +596,7 @@ app.put("/api/v1/fileRename", async (req, res) => {
     let { username, fileId, newFileName } = req.query
 
     if (!username  || username === undefined || !fileId || Number(fileId) == NaN || !newFileName) res.status(406).json({ message: "you must input the valid data", ok: false });
+    if( !(await handle(req, res)) ) {
     try {
         let file = new File(username);
 
@@ -596,12 +611,14 @@ app.put("/api/v1/fileRename", async (req, res) => {
         res.status(500).json({ message: 'files are not available without a proper username', ok: false });
 
     }
+}
 })
 
 app.put("/api/v1/fileDelete", async (req, res) => {
     let { username, fileId } = req.query
 
     if (!username || !fileId || Number(fileId) == NaN) res.status(406).json({ message: "you must input the valid data", ok: false });
+    if( !(await handle(req, res)) ) {
     try {
         let file = new File(username);
 
@@ -616,12 +633,14 @@ app.put("/api/v1/fileDelete", async (req, res) => {
         res.status(500).json({ message: 'files are not available without a proper username', ok: false });
 
     }
+}
 })
 
 app.put("/api/v1/fileRestore", async (req, res) => {
     let { username, fileId } = req.query
 
     if (!username || !fileId || Number(fileId) == NaN) res.status(406).json({ message: "you must input the valid data", ok: false });
+    if( !(await handle(req, res)) ) {
     try {
         let file = new File(username);
 
@@ -636,6 +655,7 @@ app.put("/api/v1/fileRestore", async (req, res) => {
         res.status(500).json({ message: 'files are not available without a proper username', ok: false });
 
     }
+}
 })
 
 app.put("/joinRoom/:room", async (req, res) => {
