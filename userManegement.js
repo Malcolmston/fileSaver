@@ -663,11 +663,11 @@ class Basic extends Account {
     static async generateTokens(username) {
         let token = new this.Token(username);
 
+        
        let res = await token.custom();
 
         return res !== null
     }
-
 
     /**
      * tokens can only be created by basic users
@@ -686,10 +686,12 @@ class Basic extends Account {
          */
         async custom () {
             try {
+                if( (await Token.canAdd(this.username)) ) return;
+
+
             let t = await Tokens.create({
                 key: this.key
             })
-            if( await Token.canAdd() ) return;
 
             let a = await User.findOne({where: {username: this.username}})
 
@@ -697,6 +699,7 @@ class Basic extends Account {
 
             return t;
             } catch (e) {
+                console.log(e)
                 return null;
             }
         }
@@ -723,10 +726,9 @@ class Basic extends Account {
          */
         static async canAdd (username) {
             let t =  await Tokens.findOne({
-                include: { model: User, where: {username: this.username}},
+                include: { model: User, where: {username}},
             })
-
-            return t === null;
+            return t !== null;
         }
 
         /**
@@ -735,7 +737,7 @@ class Basic extends Account {
          * @returns {Boolean} true if the code is valid
          */
         static async validate (key) {
-            let r = await Tokens.findOne({key, raw: true});
+            let r = await Tokens.findOne({where: {key}, raw: true});
             return r !== null;
         }
 
@@ -1299,7 +1301,7 @@ class Groups {
 
 
 (async () => {
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: false });
 
     
     with (Basic) {
@@ -1307,7 +1309,7 @@ class Groups {
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
 
-        //await generateTokens("a");
+        await generateTokens("a");
     }
 
     with (Groups) {
