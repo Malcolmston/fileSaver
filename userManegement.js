@@ -331,6 +331,22 @@ const Members = sequelize.define("member", {
     }
 })
 
+const Tokens = sequelize.define("token", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    key: {
+        type: DataTypes.TEXT,
+        unique: true,
+        allowNull: false
+    },
+    uses: {
+      type: DataTypes.INTEGER,
+      defaultValue: 100,
+    }
+}, { paranoid: true })
 
 User.hasMany(Logger);
 Logger.belongsTo(User);
@@ -340,6 +356,9 @@ Files.belongsTo(User);
 
 Rooms.hasMany(Files);
 Files.belongsTo(Rooms);
+
+User.hasMany(Tokens);
+Tokens.belongsTo(User);
 
 User.belongsToMany(Rooms, { through: Members })
 Rooms.belongsToMany(User, { through: Members })
@@ -567,6 +586,7 @@ class Account {
  * a more specilized virson of Accout that solly handes basic accounts
  */
 class Basic extends Account {
+
     /**
 * Signs a user up
 * @param {String} username The username to sign up
@@ -633,6 +653,95 @@ class Basic extends Account {
             })) || false;
         }
         return false
+    }
+
+    /**
+     * crates a token for a users account
+     * @param {String} username The username to log in 
+     * @returns {Boolean} true if the user had a token added, false otherwise
+     */
+    static async generateTokens(username) {
+        let token = new this.Token(username);
+
+        
+       let res = await token.custom();
+
+        return res !== null
+    }
+
+    /**
+     * tokens can only be created by basic users
+     */
+     static Token = class Token {
+  
+        constructor (username) {
+            this.key = require('crypto').randomBytes(64).toString('hex');
+            this.username = username;
+        }
+        
+        /**
+         * creates a custom token for users
+         * @param {String} username username of the user
+         * @returns returns a new object with the token
+         */
+        async custom () {
+            try {
+                if( (await Token.canAdd(this.username)) ) return;
+
+
+            let t = await Tokens.create({
+                key: this.key
+            })
+
+            let a = await User.findOne({where: {username: this.username}})
+
+            t.setUser(a)
+
+            return t;
+            } catch (e) {
+                console.log(e)
+                return null;
+            }
+        }
+
+        /**
+         * uses a users token
+         * @param {String} username username of the user
+         */
+        async use () {
+            let username = this.username;
+
+            let t =  await Tokens.findOne({
+                include: { model: User, where: {username}},
+            })
+
+
+            t.increment({["uses"]: {by: -1}})
+        }
+
+        /**
+         * Validates a user, and gaters if the account has a valid token
+         * @param {String} username username of the user
+         * @returns {Boolean} true if the code is valid, false otherwise
+         */
+        static async canAdd (username) {
+            let t =  await Tokens.findOne({
+                include: { model: User, where: {username}},
+            })
+            return t !== null;
+        }
+
+        /**
+         * gets if a token key code is valid
+         * @param {String} room a room id
+         * @returns {Boolean} true if the code is valid
+         */
+        static async validate (key) {
+            let r = await Tokens.findOne({where: {key}, raw: true});
+            return r !== null;
+        }
+
+
     }
 }
 
@@ -1190,16 +1299,18 @@ class Groups {
 }
 
 
+
 (async () => {
     await sequelize.sync({ force: false });
 
-    /*
+    
     with (Basic) {
         await signUp("a","a","a@a", "a", "a");
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
+
+        await generateTokens("a");
     }
-*/
 
     with (Groups) {
         await createRoom("a", "b");
