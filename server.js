@@ -15,12 +15,14 @@ const { PORT, HOST } = process.env;
 const handle = async (req, res) => {
     let r = await Basic.Token.validate( req.headers.authorization )
 
-    if( !req.session.valid && !r){
+     if((req.session.valid && !r)  || (!req.session.valid && r)) {
         res.status(405).json({message: "Invalid token", ok: false})
+        return true;
+     } else {
         return false
-    }
+     }
 
-    return true
+  
 }
 
 app.use(express.json({ limit: '1gb' })) // for parsing application/json
