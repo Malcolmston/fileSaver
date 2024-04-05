@@ -686,7 +686,7 @@ class Basic extends Account {
          */
         async custom () {
             try {
-                if( (await Token.canAdd(this.username)) ) return;
+                if( !(await Token.canAdd(this.username)) ) return;
 
 
             let t = await Tokens.create({
@@ -722,13 +722,13 @@ class Basic extends Account {
         /**
          * Validates a user, and gaters if the account has a valid token
          * @param {String} username username of the user
-         * @returns {Boolean} true if the code is valid, false otherwise
+         * @returns {Boolean} true if the user dosent havae a token, false otherwise
          */
         static async canAdd (username) {
             let t =  await Tokens.findOne({
                 include: { model: User, where: {username}},
             })
-            return t !== null;
+            return t === null;
         }
 
         /**
@@ -1309,7 +1309,7 @@ class Groups {
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
 
-        //await generateTokens("a");
+        await generateTokens("a");
         //await generateTokens("a");
     }
     
