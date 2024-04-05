@@ -135,3 +135,6 @@ dist
 *.sql
 *.db
 testing.sh
+
+package-lock.json
+package.json
