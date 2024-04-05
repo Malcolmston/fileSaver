@@ -426,7 +426,7 @@ class Account {
  */
     static async createSafely(username, password, email, type = "Basic", firstName = null, lastName = null) {
         try {
-            if (!(await this.deleteAccount(username))) {
+            if ( (await this.isDeleted(username))) {
                 return false; // Account already exists
             }
 
@@ -483,7 +483,7 @@ class Account {
      */
     static async restoreAccount(username) {
         try {
-            if (!(await this.deleteAccount(username))) {
+            if (!(await this.isDeleted(username))) {
                 return false; // Account already exists
             }
 
@@ -1309,8 +1309,10 @@ class Groups {
         await signUp("b","b","b@b", "b", "b");
         await signUp("c","c","c@c", "c", "c");
 
-        await generateTokens("a");
+        //await generateTokens("a");
+        //await generateTokens("a");
     }
+    
 
     with (Groups) {
         await createRoom("a", "b");
