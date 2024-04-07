@@ -285,7 +285,14 @@ app.get("/api/v1/roomFiles", async (req, res) => {
 
 app.get("/home", async (req, res) => {
     if( req.session.username && req.session.valid) {
-        res.status(200).render('basic', { username: req.session.username , message: "" });
+
+        if( !req.session.isAdmin  ){
+            res.status(200).render('basic', { username: req.session.username , message: "" });
+        } else {
+            let a = await Admin.getUsers();
+            res.status(200).render('admin', {users: JSON.stringify(a) });
+        }
+
     } else {
         res.render('home', { message: "please login" });
     }
@@ -333,6 +340,28 @@ app.post("/signup", async (req, res) => {
 app.post("/logout", (req, res) => {
     req.session.destroy();
     res.status(200).render('home', { message: "logged out" });
+})
+
+app.post("/admin", async(req, res) => {
+    let { username, password } = req.body
+
+    if (!username || !password) res.status(400).render('home', { message: "login failed, please try again" });
+    try {
+        let a = await Admin.login(username, password);
+
+        if (a) {
+            req.session.valid = true
+            req.session.username = username
+            req.session.isAdmin = true;
+
+            //res.status(200).render('basic', { username, message: "" });
+            res.redirect("/home");
+        } else {
+            res.status(400).render('home', { message: "login failed" });
+        }
+    } catch (e) {
+        res.status(500).render('home', { message: "login failed, due to a server error" })
+    }  
 })
 
 app.post('/fileupload', upload.array('file', 100), async (req, res) => {
@@ -529,7 +558,6 @@ app.put("/change/fname", async (req, res) => {
         }
     }
 })
-
 
 app.put("/change/lname", async (req, res) => {
     let username = req.session.username
