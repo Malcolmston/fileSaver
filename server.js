@@ -744,8 +744,8 @@ app.put("/room/createNew", async (req, res) => {
     }
 })
 
-app.put("/admin/change/fname", async (req, res) => {
-    let username = req.session.username
+app.put("/admin/change/fname/:username", async (req, res) => {
+    let username = req.params.username;
     let fname = req.body.fname;
 
     if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
@@ -769,8 +769,8 @@ app.put("/admin/change/fname", async (req, res) => {
     }
 })
 
-app.put("/admin/change/lname", async (req, res) => {
-    let username = req.session.username
+app.put("/admin/change/lname/:username", async (req, res) => {
+    let username = req.params.username;
     let lname = req.body.lname;
 
     if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
@@ -794,8 +794,8 @@ app.put("/admin/change/lname", async (req, res) => {
     }
 })
 
-app.put("/admin/change/username", async (req, res) => {
-    let username = req.session.username
+app.put("/admin/change/username/:username", async (req, res) => {
+    let username = req.params.username;
     let new_username = req.body.new_username;
 
     if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
@@ -819,8 +819,8 @@ app.put("/admin/change/username", async (req, res) => {
     }
 })
 
-app.put("/admin/change/password", async (req, res) => {
-    let username = req.session.username
+app.put("/admin/change/password/:username", async (req, res) => {
+    let username = req.params.username;
     let new_password = req.body.new_password;
 
     if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
@@ -861,5 +861,22 @@ app.delete("/deleteAccount", async (req, res) => {
     }
 })
 
+app.delete("/admin/deleteAccount/:username", async (req, res) => {
+    let username = req.params.username;
+
+    if (!username) req.status(403).json({ message: "user is reqired", ok: false })
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+    try {
+        let del = await Basic.deleteAccount(username);
+        if (!del) res.status(403).json({ message: "account was not deleted", ok: false })
+
+        req.session.destroy();
+        res.status(200).json({ message: "account was deleted", ok: true });//.render('home', { message:"logged out", ok: true});
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "account was not deleted, Ddue to a server error", ok: false })
+    }
+})
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
