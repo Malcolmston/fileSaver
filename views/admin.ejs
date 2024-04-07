@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+body {
+    padding: 0;
+    margin: 0;
+}
+.left {
+    float: left;
+    width: auto;
+    height: 1000px;
+    
+    background-color: lightgray;
+    
+
+}
+
+
+#myInput {
+  width: 40%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  height: 44px;
+}
+
+#serch {
+  background-color: white;
+  float: right;
+  width: 40%;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  height: 44px;
+
+}
+
+#myTable {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ddd;
+  font-size: 18px;
+}
+
+#myTable th, #myTable td {
+  text-align: left;
+  padding: 12px;
+}
+
+#myTable tr {
+  border-bottom: 1px solid #ddd;
+}
+
+#myTable tr.header, #myTable tr:hover {
+  background-color: #f1f1f1;
+}
+</style>
+
+
+</head>
+<body>
+
+
+
+    <div class="bar left">
+        
+        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names.." title="Type in a name">
+        <select onchange="sortFilter(this.value)" id="serch">
+            <option value="1" selected="true">Name</option>
+            <option value="2">Username</option>
+        </select>
+    <div id="table"></div>
+    
+    </div>
+    <div class="ans bar right">
+        
+    </div>    
+    
+
+<script type="text/javascript" src="./table.js"></script>
+
+<script>
+var serchIndex = 0;
+
+function sortFilter (value) {
+    serchIndex = Number(value) - 1
+}
+
+function myFunction() {
+ console.log(serchIndex)
+
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  table = document.querySelector("table");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+
+    td = tr[i].getElementsByTagName("th")[serchIndex];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }       
+  }
+}
+
+
+
+function add () {
+    let placement = document.getElementById("table");
+    const users = ("<%= users %>").replaceAll('&#34;', '"')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&#39;', "'");
+
+    const arr = []
+
+for( let row of JSON.parse(users) ){
+
+  arr.push({name: row.firstName +" "+ row.lastName, username: row.username})
+}
+
+let table = createDOMtable( arr );
+
+table.id = "myTable"
+table.onclick = function(event) {
+  let row = event.target.parentNode
+  if( row.parentNode.tagName == "TBODY") {
+    let arr = row.getElementsByTagName("th")
+
+    console.log(arr[1].innerText)
+
+
+  }
+}
+    
+   placement.append( table );
+}
+
+
+window.onload = add;
+</script>
+
+</body>
+</html>
+
