@@ -638,12 +638,12 @@ class Basic extends Account {
                 deletedAt: null,
                 
             }, raw: true, attributes: {
-                    include: [
+                    includes: [
                         "firstName",
                         "lastName",
                         "username"
                     ],
-                    exclude: [
+                    excludes: [
                         "updatedAt",
                         "createdAt",
                         "deletedAt",
@@ -791,7 +791,7 @@ class Admin extends Account {
      * @returns {ArrayList<Object>} gets a list of all basic users
      */
     static async getUsers () {
-        let users = await Users.findAll({where: {type: "Basic"}, attributes: {include: ["firstName", "lastName", "username"]}, raw: true});
+        let users = await User.findAll({where: {type: "Basic"}, attributes: ["firstName", "lastName", "username"], raw: true});
 
         return users;
     }
@@ -1321,6 +1321,10 @@ class Groups {
 
         await generateTokens("a");
         //await generateTokens("a");
+    }
+
+    with(Admin) {
+        await signUp("Malcolmstone", "Malcolmstone18$", "mstone@rollins.edu", "malcolm", "stone");
     }
     
 
