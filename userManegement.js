@@ -785,6 +785,16 @@ class Admin extends Account {
     static async restore(username) {
         return await this.restoreAccount(username);
     }
+
+    /**
+     * finds all basic users
+     * @returns {ArrayList<Object>} gets a list of all basic users
+     */
+    static async getUsers () {
+        let users = await Users.findAll({where: {type: "Basic"}, attributes: {include: ["firstName", "lastName", "username"]}, raw: true});
+
+        return users;
+    }
 }
 
 
