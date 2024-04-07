@@ -744,6 +744,106 @@ app.put("/room/createNew", async (req, res) => {
     }
 })
 
+app.put("/admin/change/fname", async (req, res) => {
+    let username = req.session.username
+    let fname = req.body.fname;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!fname) res.status(400).json({ message: "please enter a first name", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeFirstName(username, fname);
+            if (ret) {
+                res.status(200).json({ message: "Name changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing name', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json('basic', { message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/change/lname", async (req, res) => {
+    let username = req.session.username
+    let lname = req.body.lname;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!lname) res.status(400).json({ message: "please enter a last name", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeLastName(username, lname);
+            if (ret) {
+                res.status(200).json({ message: "last name changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing name', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json('basic', { message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/change/username", async (req, res) => {
+    let username = req.session.username
+    let new_username = req.body.new_username;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!new_username) res.status(400).json({ message: "please enter a new username", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeUsername(username, new_username);
+            if (ret) {
+                res.status(200).json({ message: "last username changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing username', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json('basic', { message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/change/password", async (req, res) => {
+    let username = req.session.username
+    let new_password = req.body.new_password;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!new_password) res.status(400).json({ message: "please enter a new password", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeUsername(username, new_username);
+            if (ret) {
+                res.status(200).json({ message: "last password changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing password', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
 app.delete("/deleteAccount", async (req, res) => {
     let username = req.session.username;
 
