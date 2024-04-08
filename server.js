@@ -844,6 +844,31 @@ app.put("/admin/change/password/:username", async (req, res) => {
     }
 })
 
+app.put("/admin/restore", async (req, res) => {
+    let username = req.params.username;
+    let new_password = req.body.new_password;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!new_password) res.status(400).json({ message: "please enter a new password", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Admin) {
+        try {
+            let ret = await restore(username);
+            if (ret) {
+                res.status(200).json({ message: "Account was restored", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error restoring this account', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
 app.delete("/deleteAccount", async (req, res) => {
     let username = req.session.username;
 
