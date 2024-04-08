@@ -795,6 +795,18 @@ class Admin extends Account {
 
         return users;
     }
+
+    /**
+     * gets a user via there username
+     * @param {String} username The username to sign up
+     * @returns {HashMap<firstName: String, lastName: String, username: String, email: String, deleted: Boolean>}
+     */
+    static async getUser(username) {
+        let u = await User.findOne({where: {type: "Basic", username}, attributes: ["firstName", "lastName", "username", "email", "deletedAt" ], paranoid: false})
+
+        let {firstName,lastName, username, email, deletedAt} = u;
+        return {firstName,lastName, username, email, deleted: (deletedAt === null) };
+    }
 }
 
 
