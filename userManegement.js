@@ -865,7 +865,7 @@ class Log {
      * @param {number | null} fileId the file that the transaction is linked to
      * @returns {boolean} true if the transaction was successful
      */
-    static async createMessage(message, userId, fileId = null, roomId = null, logId = null) {
+    static async createMessage(message, userId, fileId = null, roomId = null, tokenId = null) {
         if (userId == null) return;
         let r = await Logger.create({ message});
 
@@ -879,8 +879,8 @@ class Log {
         r.setRoom((await Room.findByPk(roomId) ))
         }
 
-        if( logId ) {
-            r.setLogger(await Logger.findByPk(logId)) 
+        if( tokenId ) {
+            r.setToken(await Tokens.findByPk(tokenId)) 
         }
 
         return r != null
