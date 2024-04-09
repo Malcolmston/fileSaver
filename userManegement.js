@@ -357,6 +357,9 @@ Logger.belongsTo(Files);
 Rooms.hasMany(Logger);
 Logger.belongsTo(Rooms);
 
+Tokens.hasMany(Logger);
+Logger.belongsTo(Tokens);
+
 User.hasMany(Files);
 Files.belongsTo(User);
 
@@ -703,6 +706,9 @@ class Basic extends Account {
 
             t.setUser(a)
 
+            await Log.createMessage("a token was created", (await Account.getId(this.username)), null, null, t.id)
+
+
             return t;
             } catch (e) {
                 console.log(e)
@@ -720,6 +726,8 @@ class Basic extends Account {
             let t =  await Tokens.findOne({
                 include: { model: User, where: {username}},
             })
+
+            await Log.createMessage("a token was used", (await Account.getId(this.username)), null, null, t.id)
 
 
             t.increment({["uses"]: {by: -1}})
@@ -789,6 +797,7 @@ class Admin extends Account {
      * @see Acccount.restoreAccount
      */
     static async restore(username) {
+
         return await this.restoreAccount(username);
     }
 
@@ -856,13 +865,25 @@ class Log {
      * @param {number | null} fileId the file that the transaction is linked to
      * @returns {boolean} true if the transaction was successful
      */
-    static async createMessage(message, userId, fileId = null) {
+    static async createMessage(message, userId, fileId = null, roomId = null, logId = null) {
         if (userId == null) return;
-        return (await Logger.create({
-            message: message,
-            userId: userId,
-            fileId: fileId
-        })) != null
+        let r = await Logger.create({ message});
+
+        if(userId) {
+        r.setUser((await User.findByPk(userId) ))
+        }
+        if(fileId){
+        r.setFile((await Files.findByPk(fileId) ))
+        } 
+        if( roomId ) {
+        r.setRoom((await Room.findByPk(roomId) ))
+        }
+
+        if( logId ) {
+            r.setLogger(await Logger.findByPk(logId)) 
+        }
+
+        return r != null
     }
 }
 
@@ -1094,6 +1115,11 @@ class File extends Basic {
 
             file.save();
 
+            let userId = await Account.getId(username);
+
+            await Log.createMessage("a file name was chnged", userId, file.id, null)
+
+
             return !!file;
         } catch (error) {
             console.error("Error changing file name:", error);
@@ -1134,6 +1160,7 @@ class Groups {
 
         roomPeople = await Promise.all(roomPeople);
 
+        await Log.createMessage("a room was created", null, null, room.id)
 
         try {
             await Members.bulkCreate(roomPeople)
@@ -1203,6 +1230,9 @@ class Groups {
         if (place < 0 || place > 2) place = 0;
         try {
             await Members.create({ userId, roomId: roomId, place })
+
+            await Log.createMessage("room was added to", userId, null, roomId)
+
             return true
         } catch (e) {
             return false;
@@ -1219,7 +1249,14 @@ class Groups {
         let userId = await Account.getId(username);
 
         try {
-            return (await Members.destroy({ where: { roomId, userId } })) == 1
+
+           
+
+             if( (await Members.destroy({ where: { roomId, userId } })) == 1 ) {
+                await Log.createMessage("a user in a room was removed", userId, null, roomId)
+                return true;
+             } 
+             return false;
         } catch (e) {
             return false;
         }
@@ -1300,6 +1337,9 @@ class Groups {
         a.place = newPlace;
 
         a.save();
+        await Log.createMessage("a user in a room was changed", userId, null, roomId)
+
+
         return true;
     }
 
@@ -1322,8 +1362,11 @@ class Groups {
 
             // Create file entry
             let f = await Files.create({ encoding, mimetype, size, originalname, data, name});
-
+            
             await f.setRoom(u)
+
+            await Log.createMessage("a user in a room added a file", null, f.id, roomId)
+
 
             return true;
         } catch (error) {
@@ -1347,6 +1390,8 @@ class Groups {
 
         try {
             await Members.update({ switch: switchValue }, { where: { roomId, userId } })
+            await Log.createMessage("a member has joined a room", userId, null, roomId)
+
             return true
         } catch (e) {
             return false;
