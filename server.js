@@ -13,14 +13,21 @@ const upload = multer();
 const { PORT, HOST } = process.env;
 
 const handle = async (req, res) => {
-    let r = await Basic.Token.validate( req.headers.authorization )
-
-     if((req.session.valid && !r)  || (!req.session.valid && r)) {
-        res.status(405).json({message: "Invalid token", ok: false})
-        return true;
-     } else {
+    if( req.session.valid ){
         return false
-     }
+    } else  {
+        let r = await Basic.Token.validate( req.headers.authorization )
+
+        if(r) {
+            res.status(405).json({message: "Invalid token", ok: false})
+            return true;
+         } else {
+            return false
+         }
+
+    }
+
+     
 
   
 }
@@ -167,6 +174,33 @@ app.get('/api/v1/users', async (req, res) => {
 }
 
 
+})
+
+app.get("/api/v1/getUser", async (req, res) => {
+    let { username, json} = req.query;
+
+    json = (json == "true" ? true : false)
+
+
+    if( !username  ) return res.status(400).json({ message:"please give a username", ok: false});
+
+    if( !req.session.isAdmin  ) return res.status(400).json({ message:"to use this you must be admin", ok: false});
+    try {
+        if( !(await handle(req, res)) ) {
+         let c = await Admin.getUser(username);
+
+            if(json) {
+             res.status(200).json(c);
+            } else {
+                res.render("./admin_tabs/home", c);
+            }
+         }
+         } catch (err) {
+             console.log(err)
+             res.status(500).json({ message: err.message, ok: false });
+         }
+
+    
 })
 
 app.get("/room/open/:room", async (req, res) => {

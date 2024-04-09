@@ -733,11 +733,11 @@ class Basic extends Account {
 
         /**
          * gets if a token key code is valid
-         * @param {String} room a room id
+         * @param {String} value a valid key value
          * @returns {Boolean} true if the code is valid
          */
-        static async validate (key) {
-            let r = await Tokens.findOne({where: {key}, raw: true});
+        static async validate (value) {
+            let r = await Tokens.findOne({where: {key: value}, raw: true});
             return r !== null;
         }
 
@@ -796,17 +796,46 @@ class Admin extends Account {
         return users;
     }
 
-    /**
-     * gets a user via there username
-     * @param {String} username The username to sign up
-     * @returns {HashMap<firstName: String, lastName: String, username: String, email: String, deleted: Boolean>}
-     */
-    static async getUser(username) {
-        let u = await User.findOne({where: {type: "Basic", username}, attributes: ["firstName", "lastName", "username", "email", "deletedAt" ], paranoid: false})
-
-        let {firstName,lastName, username, email, deletedAt} = u;
-        return {firstName,lastName, username, email, deleted: (deletedAt === null) };
+/**
+ * gets a user via their username
+ * @param {String} basic_username The username to look up
+ * @returns {Promise<{ firstName: String, lastName: String, username: String, email: String, deleted: Boolean }>} User details
+ */
+static async getUser(basic_username) {
+    // Ensure basic_username is provided
+    if (!basic_username) {
+        throw new Error("Username is required.");
     }
+
+    // Find the user based on username and type
+    let u = await User.findOne({
+        where: {
+            type: "Basic",
+            username: basic_username
+        },
+        attributes: ["firstName", "lastName", "username", "email", "deletedAt"],
+        paranoid: false // Include soft-deleted users
+    });
+
+    // If user is found
+    if (u) {
+        // Destructure user object to extract required attributes
+        let { firstName, lastName, username, email, deletedAt } = u;
+        
+        // Return an object containing user details and deleted status
+        return {
+            firstName,
+            lastName,
+            username,
+            email,
+            deleted: (deletedAt !== null) // Check if user has been deleted
+        };
+    } else {
+        // Handle case when user is not found
+        return null;
+    }
+}
+
 }
 
 
