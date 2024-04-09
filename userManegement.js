@@ -851,6 +851,16 @@ static async getUser(basic_username) {
     }
 }
 
+/**
+ * gets all logs for a user
+ * @param {String} basic_username The username to look up
+ * @returns {Promise<{id, message}>}
+ */
+static async getLogs (basic_username) {
+    let userId = await super.getId(basic_username);
+    return await Logger.findAll({where: {userId}, raw: true})
+}
+
 }
 
 
