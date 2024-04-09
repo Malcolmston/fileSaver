@@ -351,6 +351,12 @@ const Tokens = sequelize.define("token", {
 User.hasMany(Logger);
 Logger.belongsTo(User);
 
+Files.hasMany(Logger);
+Logger.belongsTo(Files);
+
+Rooms.hasMany(Logger);
+Logger.belongsTo(Rooms);
+
 User.hasMany(Files);
 Files.belongsTo(User);
 
