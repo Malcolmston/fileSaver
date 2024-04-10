@@ -3,6 +3,8 @@ require('dotenv').config() // adds the ability to create environment variables
 const express = require('express');
 const multer = require('multer');
 const { sessionMiddleware } = require('./router.js')
+const fs = require('fs');
+const path = require('path');
 const { Basic, Admin, File, Groups } = require('./userManegement.js');
 
 
@@ -44,9 +46,6 @@ app.use(sessionMiddleware);
 app.get("/", async (req, res) => {
     const { valid, username, isAdmin } = req.session
     if (isAdmin && valid) {
-        let data = await Admin.getAll(username);
-
-
     } else if (valid) {
         res.render('basic', { username, message: '' });
     } else {
@@ -177,27 +176,69 @@ app.get('/api/v1/users', async (req, res) => {
 })
 
 app.get("/api/v1/getUser", async (req, res) => {
-    let { username, json} = req.query;
+    let { username, json, page} = req.query;
 
     json = (json == "true" ? true : false)
-
+   
 
     if( !username  ) return res.status(400).json({ message:"please give a username", ok: false});
 
     if( !req.session.isAdmin  ) return res.status(400).json({ message:"to use this you must be admin", ok: false});
     try {
         if( !(await handle(req, res)) ) {
-         let c = await Admin.getUser(username);
+            let c = await Admin.getUser(username);
+            let logs = await Admin.getLogs(username);
 
             if(json) {
-             res.status(200).json(c);
+                res.status(200).json(c);
             } else {
-                res.render("./admin_tabs/home", c);
-            }
+                const directoryPath = path.join(__dirname, 'views/admin_tabs');
+
+                switch (page) {
+                    case "1":
+                        res.render("./admin_tabs/home", c);
+                        break;
+                    case "2":
+                        res.render("./admin_tabs/account", c);
+                        break;
+                    case "3":
+                        res.render("./admin_tabs/account_logs", c);
+                        break;
+                    case "all":
+                    default:
+                        fs.readdir(directoryPath, function (err, files) {
+                            // handling error
+                            if (err) {
+                                res.status(500).json({ message: err.message, ok: false });
+                            }
+                
+                            let d = {};
+                            // Render all admin tabs
+                            d["data"] = c
+                            d["logs"] = logs
+
+                            files.forEach(function (file) {
+                                // Extract file name without extension
+                                const tabName = path.parse(file);
+                               
+                                
+                                let n = fs.readFileSync(directoryPath+"/"+file, "utf8");
+
+                                d[tabName.name] = n;
+
+                            });
+
+                            res.status(200).json(d)
+                        });
+                        break;
+                }
+
+                
+                }                
          }
-         } catch (err) {
-             console.log(err)
-             res.status(500).json({ message: err.message, ok: false });
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: err.message, ok: false });
          }
 
     
