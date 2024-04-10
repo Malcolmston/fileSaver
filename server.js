@@ -189,6 +189,7 @@ app.get("/api/v1/getUser", async (req, res) => {
             let c = await Admin.getUser(username);
             let logs = await Admin.getLogs(username);
 
+            c.logs = logs;
             if(json) {
                 res.status(200).json(c);
             } else {

@@ -104,15 +104,15 @@
     <div class="tab-content" id="pills-tabContent">
       <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
         tabindex="0">
-
+        <iframe id="home" src=""></iframe>
       </div>
 
       <div class="tab-pane fade" id="pills-account" role="tabpanel" aria-labelledby="pills-account-tab" tabindex="0">
-
+        <iframe id="account" src=""></iframe>
       </div>
 
       <div class="tab-pane fade" id="pills-logs" role="tabpanel" aria-labelledby="pills-logs-tab" tabindex="0">
-
+        <iframe id="logs" src=""></iframe>
       </div>
     </div>
   </div>
@@ -177,24 +177,10 @@
         if (row.parentNode.tagName == "TBODY") {
           let arr = row.getElementsByTagName("th")
 
-          var xhttp = new XMLHttpRequest();
-          xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-              // Typical action to be performed when the document is ready:
-              const d = JSON.parse(xhttp.responseText)
-              let data = d["data"]
-              let logs = d["logs"]
+          document.querySelector("#home").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=1`
+          document.querySelector("#account").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=2`
+          document.querySelector("#logs").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=3`
 
-              document.querySelector("#pills-home").innerHTML = ejs.render(d["home"],data);
-              document.querySelector("#pills-account").innerHTML = ejs.render(d["account"],data);
-              document.querySelector("#pills-logs").innerHTML = ejs.render(d["account_logs"], {"logs":logs});
-
-         
-              //document.querySelector("#pills-home").innerHTML = xhttp.responseText;
-            }
-          };
-          xhttp.open("GET", `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=all`, true);
-          xhttp.send();
 
         } else {
 
