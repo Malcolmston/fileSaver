@@ -1,0 +1,44 @@
+<table class="table table-striped" style="position: absolute; left: 26%; top: 1.3in; width: 4in">
+    <thead>
+        <tr>
+            <th>message id</th>
+            <th>message</th>
+            <th>userId</th>
+            <th>fileId</th>
+            <th>tokenId</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <% for( log of logs ) { %>
+            <tr>
+                <td>
+                    <%= log.id %>
+                </td>
+                <td>
+                    <%= log.message %>
+                </td>
+
+
+                <td>
+                    <%= log.userId ? log.userId : "not assigned to a user" %>
+                </td>
+                <td>
+                    <%= log.fileId ? log.fileId : "not assigned to a user" %>
+                </td>
+                <td>
+                    <%= log.roomId ? log.roomId : "not assigned to a user" %>
+                </td>
+                <td>
+                    <%= log.tokenId ? log.tokenId : "not assigned to a user" %>
+                </td>
+            </tr>
+
+
+
+            <% } %>
+
+                <tr>
+
+    </tbody>
+</table>
