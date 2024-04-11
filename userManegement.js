@@ -413,8 +413,6 @@ class Account {
  */
     static async isDeleted(username) {
         try {
-            if (await this.userExists(username)) return false;
-
             let user = await User.findOne({ where: { username, deletedAt: { [Op.ne]: [null] } } });
             return user != null;
         } catch (error) {
@@ -492,11 +490,11 @@ class Account {
      */
     static async restoreAccount(username) {
         try {
-            if (!(await this.isDeleted(username))) {
+            if ( (await this.isDeleted(username))) {
                 return false; // Account already exists
             }
 
-            await User.restore();
+            await User.restore({where: {username}});
             await Log.createMessage("Acccount was restored", (await Account.getId(username)))
 
             return true;
@@ -806,7 +804,7 @@ class Admin extends Account {
      * @returns {ArrayList<Object>} gets a list of all basic users
      */
     static async getUsers () {
-        let users = await User.findAll({where: {type: "Basic"}, attributes: ["firstName", "lastName", "username"], raw: true});
+        let users = await User.findAll({where: {type: "Basic"}, attributes: ["firstName", "lastName", "username"], paranoid: false, raw: true});
 
         return users;
     }
