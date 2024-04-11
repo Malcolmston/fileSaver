@@ -4,7 +4,7 @@ integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2
 <body>
 
     
-    <table class="table table-striped" style="position: absolute; left: 26%; top: 1.3in; width: 4in">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>First name</th>
@@ -28,7 +28,7 @@ integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2
     <% if(deleted) { %>
         <label for="checkbox">This account has been deleted</label>
 
-        <div style="position: absolute; left: 26%; top: 2.5in;">
+        <div>
             <input class="btn btn-outline-warning" id="restoreAccount" type="submit" value="Restore account"/>
 
             </div>
@@ -36,7 +36,7 @@ integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2
     <% } else { %>
         <label for="checkbox">This account has not been deleted</label>
     
-        <div style="position: absolute; left: 26%; top: 2.5in;">
+        <div >
     
             <form id="form_1" class="needs-validation" novalidate>
                 <div class="input-group mb-3">

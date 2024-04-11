@@ -1,10 +1,11 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
 integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
+
 <body>
 
 
-    <table class="table table-striped" style="position: absolute; left: 26%; top: 1.3in; width: 4in">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>First name</th>
@@ -25,18 +26,87 @@ integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2
     
     <input type="checkbox" disabled checked="deleted" id="checkbox"/>
     
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+             const toast_message = {
+     Toast: Swal.mixin({
+   toast: true,
+   position: "top-end",
+   showConfirmButton: false,
+   timer: 3000,
+   timerProgressBar: true,
+   didOpen: (toast) => {
+     toast.onmouseenter = Swal.stopTimer;
+     toast.onmouseleave = Swal.resumeTimer;
+   }
+ }),
+ 
+     error: function (message){
+         this.Toast.fire({
+           icon: "error",
+           title: message
+         });
+     },
+
+     success: function (message){
+         this.Toast.fire({
+           icon: "success",
+           title: message
+         });
+     }
+ 
+     
+ }
+    </script>
+
     <% if(deleted) { %>
         <label for="checkbox">This account has been deleted</label>
 
-        <div style="position: absolute; left: 26%; top: 2.5in;">
+        <div>
             <input class="btn btn-outline-warning" id="restoreAccount" type="submit" value="Restore account"/>
 
             </div>
 
+
+            <script>
+              const form = document.getElementById("restoreAccount");
+
+              form.addEventListener("click", (event) => {
+  Swal.fire({
+  title: "Are you sure you want to restore this account?",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "green",
+  cancelButtonColor: "#d33",
+  confirmButtonText: "Yes, recover it!"
+}).then((result) => {
+  if (result.isConfirmed) {
+    fetch('/admin/restore/<%= username %>', {method: 'PUT'}).then(x => x.json() ).then( (data) => {
+      if( data.ok ){
+       toast_message.success(data.message);
+    window.location.reload();
+      } else {
+        toast_message.error(data.message);
+      }
+    })
+    /*
+    Swal.fire({
+      title: "Deleted!",
+      text: "Your file has been deleted.",
+      icon: "success"
+    });
+    */
+  }
+});
+})
+
+            </script>
+
     <% } else { %>
         <label for="checkbox">This account has not been deleted</label>
     
-        <div style="position: absolute; left: 26%; top: 2.5in;">
+        <div>
     
             <form id="form_1" class="needs-validation" novalidate>
                 <div class="input-group mb-3">
@@ -100,8 +170,7 @@ integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2
     
         <hr>
     
-        <script type="text/javascript" src="./fileHandle.js"></script>
-
+        
     <script>
 // /admin/change/
 let fm1 = document.querySelector('#form_1'),
@@ -115,8 +184,33 @@ const forms = [{ form: fm1, req: "fname" }, { form: fm2, req: "lname" }, { form:
 
 
 rm5.addEventListener("click", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
+  Swal.fire({
+  title: "Are you sure you want to delete this account?",
+  text: "You can always have your account recoverd",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "#3085d6",
+  cancelButtonColor: "#d33",
+  confirmButtonText: "Yes, delete it!"
+}).then((result) => {
+  if (result.isConfirmed) {
+    fetch('/admin/deleteAccount/<%= username %>', {method: 'DELETE'}).then(x => x.json() ).then( (data) => {
+      if( data.ok ){
+       toast_message.success(data.message);
+    window.location.reload();
+      } else {
+        toast_message.error(data.message);
+      }
+    })
+    /*
+    Swal.fire({
+      title: "Deleted!",
+      text: "Your file has been deleted.",
+      icon: "success"
+    });
+    */
+  }
+});
 })
 
 
