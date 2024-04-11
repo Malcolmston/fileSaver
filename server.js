@@ -920,14 +920,11 @@ app.put("/admin/change/password/:username", async (req, res) => {
     }
 })
 
-app.put("/admin/restore", async (req, res) => {
+app.put("/admin/restore/:username", async (req, res) => {
     let username = req.params.username;
-    let new_password = req.body.new_password;
 
     if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
-    if (!new_password) res.status(400).json({ message: "please enter a new password", ok: false });
     if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
-
 
     with (Admin) {
         try {
@@ -939,7 +936,7 @@ app.put("/admin/restore", async (req, res) => {
             }
         } catch (e) {
             console.error(e);
-            res.status(500).json({ message: 'Error ' + e, ok: false });
+            res.status(500).json({ message: 'Error ' + e.message, ok: false });
 
         }
     }
@@ -966,13 +963,14 @@ app.delete("/admin/deleteAccount/:username", async (req, res) => {
     let username = req.params.username;
 
     if (!username) req.status(403).json({ message: "user is reqired", ok: false })
-    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+    if ( !req.session.isAdmin ) res.status(400).json({ message: "This account is not admin", ok: false });
+    
 
     try {
         let del = await Basic.deleteAccount(username);
         if (!del) res.status(403).json({ message: "account was not deleted", ok: false })
 
-        req.session.destroy();
+        //req.session.destroy();
         res.status(200).json({ message: "account was deleted", ok: true });//.render('home', { message:"logged out", ok: true});
     } catch (e) {
         console.error(e);
