@@ -3,6 +3,8 @@ require('dotenv').config() // adds the ability to create environment variables
 const express = require('express');
 const multer = require('multer');
 const { sessionMiddleware } = require('./router.js')
+const fs = require('fs');
+const path = require('path');
 const { Basic, Admin, File, Groups } = require('./userManegement.js');
 
 
@@ -13,14 +15,21 @@ const upload = multer();
 const { PORT, HOST } = process.env;
 
 const handle = async (req, res) => {
-    let r = await Basic.Token.validate( req.headers.authorization )
-
-     if((req.session.valid && !r)  || (!req.session.valid && r)) {
-        res.status(405).json({message: "Invalid token", ok: false})
-        return true;
-     } else {
+    if( req.session.valid ){
         return false
-     }
+    } else  {
+        let r = await Basic.Token.validate( req.headers.authorization )
+
+        if(r) {
+            res.status(405).json({message: "Invalid token", ok: false})
+            return true;
+         } else {
+            return false
+         }
+
+    }
+
+     
 
   
 }
@@ -37,9 +46,6 @@ app.use(sessionMiddleware);
 app.get("/", async (req, res) => {
     const { valid, username, isAdmin } = req.session
     if (isAdmin && valid) {
-        let data = await Admin.getAll(username);
-
-
     } else if (valid) {
         res.render('basic', { username, message: '' });
     } else {
@@ -169,6 +175,76 @@ app.get('/api/v1/users', async (req, res) => {
 
 })
 
+app.get("/api/v1/getUser", async (req, res) => {
+    let { username, json, page} = req.query;
+
+    json = (json == "true" ? true : false)
+   
+
+    if( !username  ) return res.status(400).json({ message:"please give a username", ok: false});
+
+    if( !req.session.isAdmin  ) return res.status(400).json({ message:"to use this you must be admin", ok: false});
+    try {
+        if( !(await handle(req, res)) ) {
+            let c = await Admin.getUser(username);
+            let logs = await Admin.getLogs(username);
+
+            c.logs = logs;
+            if(json) {
+                res.status(200).json(c);
+            } else {
+                const directoryPath = path.join(__dirname, 'views/admin_tabs');
+
+                switch (page) {
+                    case "1":
+                        res.render("./admin_tabs/home", c);
+                        break;
+                    case "2":
+                        res.render("./admin_tabs/account", c);
+                        break;
+                    case "3":
+                        res.render("./admin_tabs/account_logs", c);
+                        break;
+                    case "all":
+                    default:
+                        fs.readdir(directoryPath, function (err, files) {
+                            // handling error
+                            if (err) {
+                                res.status(500).json({ message: err.message, ok: false });
+                            }
+                
+                            let d = {};
+                            // Render all admin tabs
+                            d["data"] = c
+                            d["logs"] = logs
+
+                            files.forEach(function (file) {
+                                // Extract file name without extension
+                                const tabName = path.parse(file);
+                               
+                                
+                                let n = fs.readFileSync(directoryPath+"/"+file, "utf8");
+
+                                d[tabName.name] = n;
+
+                            });
+
+                            res.status(200).json(d)
+                        });
+                        break;
+                }
+
+                
+                }                
+         }
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: err.message, ok: false });
+         }
+
+    
+})
+
 app.get("/room/open/:room", async (req, res) => {
     let room = req.params.room;
     let username = req.session.username;
@@ -285,7 +361,14 @@ app.get("/api/v1/roomFiles", async (req, res) => {
 
 app.get("/home", async (req, res) => {
     if( req.session.username && req.session.valid) {
-        res.status(200).render('basic', { username: req.session.username , message: "" });
+
+        if( !req.session.isAdmin  ){
+            res.status(200).render('basic', { username: req.session.username , message: "" });
+        } else {
+            let a = await Admin.getUsers();
+            res.status(200).render('admin', {users: JSON.stringify(a) });
+        }
+
     } else {
         res.render('home', { message: "please login" });
     }
@@ -333,6 +416,28 @@ app.post("/signup", async (req, res) => {
 app.post("/logout", (req, res) => {
     req.session.destroy();
     res.status(200).render('home', { message: "logged out" });
+})
+
+app.post("/admin", async(req, res) => {
+    let { username, password } = req.body
+
+    if (!username || !password) res.status(400).render('home', { message: "login failed, please try again" });
+    try {
+        let a = await Admin.login(username, password);
+
+        if (a) {
+            req.session.valid = true
+            req.session.username = username
+            req.session.isAdmin = true;
+
+            //res.status(200).render('basic', { username, message: "" });
+            res.redirect("/home");
+        } else {
+            res.status(400).render('home', { message: "login failed" });
+        }
+    } catch (e) {
+        res.status(500).render('home', { message: "login failed, due to a server error" })
+    }  
 })
 
 app.post('/fileupload', upload.array('file', 100), async (req, res) => {
@@ -530,7 +635,6 @@ app.put("/change/fname", async (req, res) => {
     }
 })
 
-
 app.put("/change/lname", async (req, res) => {
     let username = req.session.username
     let lname = req.body.lname;
@@ -716,6 +820,128 @@ app.put("/room/createNew", async (req, res) => {
     }
 })
 
+app.put("/admin/change/fname/:username", async (req, res) => {
+    let username = req.params.username;
+    let fname = req.body.fname;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!fname) res.status(400).json({ message: "please enter a first name", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeFirstName(username, fname);
+            if (ret) {
+                res.status(200).json({ message: "Name changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing name', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json('basic', { message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/change/lname/:username", async (req, res) => {
+    let username = req.params.username;
+    let lname = req.body.lname;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!lname) res.status(400).json({ message: "please enter a last name", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeLastName(username, lname);
+            if (ret) {
+                res.status(200).json({ message: "last name changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing name', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json('basic', { message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/change/username/:username", async (req, res) => {
+    let username = req.params.username;
+    let new_username = req.body.new_username;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!new_username) res.status(400).json({ message: "please enter a new username", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeUsername(username, new_username);
+            if (ret) {
+                res.status(200).json({ message: "last username changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing username', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json('basic', { message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/change/password/:username", async (req, res) => {
+    let username = req.params.username;
+    let new_password = req.body.new_password;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!new_password) res.status(400).json({ message: "please enter a new password", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+
+    with (Basic) {
+        try {
+            let ret = await changeUsername(username, new_username);
+            if (ret) {
+                res.status(200).json({ message: "last password changed", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error changing password', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Error ' + e, ok: false });
+
+        }
+    }
+})
+
+app.put("/admin/restore/:username", async (req, res) => {
+    let username = req.params.username;
+
+    if (!username) res.status(400).json({ message: "please enter a valid username", ok: false });
+    if (!req.session.isAdmin) res.status(400).json({ message: "This account is not admin", ok: false });
+
+    with (Admin) {
+        try {
+            let ret = await restore(username);
+            if (ret) {
+                res.status(200).json({ message: "Account was restored", ok: true });
+            } else {
+                res.status(400).json({ message: 'Error restoring this account', ok: false });
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Error ' + e.message, ok: false });
+
+        }
+    }
+})
+
 app.delete("/deleteAccount", async (req, res) => {
     let username = req.session.username;
 
@@ -733,5 +959,23 @@ app.delete("/deleteAccount", async (req, res) => {
     }
 })
 
+app.delete("/admin/deleteAccount/:username", async (req, res) => {
+    let username = req.params.username;
+
+    if (!username) req.status(403).json({ message: "user is reqired", ok: false })
+    if ( !req.session.isAdmin ) res.status(400).json({ message: "This account is not admin", ok: false });
+    
+
+    try {
+        let del = await Basic.deleteAccount(username);
+        if (!del) res.status(403).json({ message: "account was not deleted", ok: false })
+
+        //req.session.destroy();
+        res.status(200).json({ message: "account was deleted", ok: true });//.render('home', { message:"logged out", ok: true});
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: "account was not deleted, Ddue to a server error", ok: false })
+    }
+})
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
