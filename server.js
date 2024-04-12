@@ -24,7 +24,15 @@ const handle = async (req, res) => {
             res.status(405).json({message: "Invalid token", ok: false})
             return true;
          } else {
-            return false
+            let token = new Basic.Token( req.params.username || req.body.username || req.query.username);
+
+            if( (await token.use()) ){
+                return false;
+            } else {
+                 res.status(403).json({message: "token has been used all 100 times", ok: false})
+                 return true
+            }
+
          }
 
     }

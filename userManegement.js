@@ -695,7 +695,6 @@ class Basic extends Account {
             try {
                 if( !(await Token.canAdd(this.username)) ) return;
 
-
             let t = await Tokens.create({
                 key: this.key
             })
@@ -717,6 +716,7 @@ class Basic extends Account {
         /**
          * uses a users token
          * @param {String} username username of the user
+         * @returns true if the token was used successfully and false otherwise.
          */
         async use () {
             let username = this.username;
@@ -725,10 +725,14 @@ class Basic extends Account {
                 include: { model: User, where: {username}},
             })
 
+
+            if( t.uses <= -1 ) Log.createMessage("Token overhead was reached. This error must be resolved", (await Account.getId(this.username)), null, null, t.id)
+            if( t.uses <= 0 ) return false
+
+            t.increment( {uses: -1})
             await Log.createMessage("a token was used", (await Account.getId(this.username)), null, null, t.id)
 
-
-            t.increment({["uses"]: {by: -1}})
+            return true
         }
 
         /**
@@ -740,6 +744,7 @@ class Basic extends Account {
             let t =  await Tokens.findOne({
                 include: { model: User, where: {username}},
             })
+
             return t === null;
         }
 
