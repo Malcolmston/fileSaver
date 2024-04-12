@@ -81,7 +81,9 @@ app.get("/myFiles/:room", async (req, res) => {
 
         let files = JSON.stringify((await File.getAllFiles(null, room)))
 
-        let size = 0//(await file.getSize());
+        let size = (await File.getSize(null, roomId));
+        size = size.value + " " + size.long;
+
         return res.status(200).render("./basic_tabs/fileHandle", { username, files, size })
 
 
@@ -96,14 +98,14 @@ app.get("/api/v1/myFiles", async (req, res) => {
     if (!username)  return res.status(403).json({ message: "you must log in inorder to user this feture", ok: false });
 
 
-    const file = (new File(username));
 
     json = (json == "true" ? true : false)
 
     try {
 
         let files = JSON.stringify((await File.getAllFiles(username)))
-        let size = (await file.getSize());
+        let size = (await File.getSize(username));
+        size = size.value + " " + size.long;
         if (json) {
             res.json({ files })
         } else {
@@ -353,7 +355,11 @@ app.get("/api/v1/roomFiles", async (req, res) => {
     try {
 
         let files = JSON.stringify((await File.getAllFiles(null, room)))
-        let size = (await file.getSize());
+
+
+        let size = (await File.getSize(null, (await Groups.getRoom(room)) ));
+        size = size.value + " " + size.long;
+
         if (json) {
             res.json({ files })
         } else {

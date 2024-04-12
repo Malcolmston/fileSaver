@@ -1090,11 +1090,17 @@ class File extends Basic {
 
     }
 
-    async getSize() {
-        let userId = await Account.getId(this.username);
-        let json = byteSize(await Files.sum("size", { where: { userId } }))
+    /**
+     * 
+     * @param {String | null} username the usernamae of the given user assigned to a grpup of files
+     * @param {int | null} roomId a refrece id to a room tht the file may be assigned to
+     * @returns {JSON} the json value passed by byteSize to relate data
+     */
+    static async getSize(username, roomId = null) {
+        let userId = await Account.getId(username);
+        let json = byteSize(await Files.sum("size", { where: { userId, roomId} }))
 
-        return json.value + " " + json.long;
+        return json; //json.value + " " + json.long;
     }
 
     /**
