@@ -21,6 +21,7 @@ const sequelize = new Sequelize({
 
 const byteSize = require('byte-size')
 const bcrypt = require("bcrypt");
+const MAX_FILE_SIZE = 2000000000; // this value is around 2 GB
 /**
  * based on a given date and time, this function takes a date and formats in
  * @param {Date} data a date
@@ -978,6 +979,20 @@ class File extends Basic {
             console.error("Error restoring account:", error);
             return false;
         }
+    }
+
+    /**
+     * this function checs to see if files can be added bases of file size
+     * @param {number} size the size of the incoming file
+     * @returns false if the file incoming is too large
+     */
+    async validateFile(size) {
+        let username = this.username;
+
+        let curr_size = this.getSize(username);
+
+        return curr_size < MAX_FILE_SIZE &&  curr_size + size < MAX_FILE_SIZE 
+
     }
 
     /**
