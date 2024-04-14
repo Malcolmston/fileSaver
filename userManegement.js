@@ -4,16 +4,32 @@ require('dotenv').config();
 const salt = process.env.SALT;
 
 
+const database = process.env.DATABASE_NAME;
+const host = process.env.DATABASE_ROOT;
+const password = process.env.DATABASE_PASSWORD;
+const db_username = process.env.DATABASE_USERNAME
+
+
 if (!salt) {
     console.error("Error: PORT, HOST, or SALT environment variables are missing.");
     process.exit(1);
 }
 
 const { Sequelize, DataTypes, Op } = require('sequelize');
-
+/*
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'database.sqlite',
+    standardConformingStrings: true,
+    benchmark: true,
+    logging: false,
+});
+*/
+
+// Option 3: Passing parameters separately (other dialects)
+const sequelize = new Sequelize(database, db_username, password, {
+    host: host,
+    dialect: "mysql",/* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */
     standardConformingStrings: true,
     benchmark: true,
     logging: false,
@@ -173,40 +189,30 @@ const Files = sequelize.define("files", {
         primaryKey: true,
         autoIncrement: true
     },
-
-
     encoding: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
-
-
     mimetype: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
-
     size: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER, // Use DataTypes.INTEGER for numeric fields
         allowNull: false,
         get() {
             let size = this.getDataValue('size');
-
-
-            let c = byteSize(size)
-            return c.value + c.unit
+            let c = byteSize(size);
+            return c.value + c.unit;
         }
     },
-
     originalname: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
-
     name: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         unique: false,
-
         set: function (name) {
             if (!name) {
                 this.setDataValue("name", this.getDataValue("originalname"))
@@ -215,11 +221,24 @@ const Files = sequelize.define("files", {
             }
         }
     },
-
     data: {
-        type: DataTypes.BLOB,
+        type: DataTypes.BLOB('long'), // Define BLOB column with 'long' length
         allowNull: false,
-    }
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    userId: DataTypes.INTEGER,
+    roomId: DataTypes.INTEGER
 }, { paranoid: true });
 
 const User = sequelize.define("user", {
@@ -230,15 +249,15 @@ const User = sequelize.define("user", {
     },
 
     type: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255), // Specify length for username
         isNull: false,
     },
 
-    firstName: DataTypes.TEXT,
-    lastName: DataTypes.TEXT,
+    firstName: DataTypes.STRING(255),
+    lastName: DataTypes.STRING(255),
 
     username: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255), // Specify length for username
         unique: true,
 
         validate: {
@@ -259,7 +278,7 @@ const User = sequelize.define("user", {
     },
 
     password: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255), // Specify length for username
         allowNull: false,
 
         set: function (password) {
@@ -271,11 +290,20 @@ const User = sequelize.define("user", {
     },
 
     email: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255), // Specify length for username
         unique: true,
         isEmail: true,
     },
 
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    deletedAt: DataTypes.DATE
 }, { paranoid: true });
 
 const Logger = sequelize.define("logger", {
@@ -285,8 +313,23 @@ const Logger = sequelize.define("logger", {
         autoIncrement: true
     },
 
-    message: DataTypes.TEXT,
+    message: DataTypes.STRING(255),
 
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    userId: DataTypes.INTEGER,
+    roomId: DataTypes.INTEGER,
+    tokenId: DataTypes.INTEGER
 }, { paranoid: true })
 
 const Rooms = sequelize.define("room", {
@@ -296,10 +339,19 @@ const Rooms = sequelize.define("room", {
         autoIncrement: true
     },
     name: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         unique: true,
         allowNull: false
-    }
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    deletedAt: DataTypes.DATE
 }, { paranoid: true })
 
 const Members = sequelize.define("member", {
@@ -330,7 +382,21 @@ const Members = sequelize.define("member", {
 
             }
         }
-    }
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    userId: DataTypes.INTEGER,
+    roomId: DataTypes.INTEGER
 })
 
 const Tokens = sequelize.define("token", {
@@ -340,14 +406,27 @@ const Tokens = sequelize.define("token", {
         autoIncrement: true
     },
     key: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         unique: true,
         allowNull: false
     },
     uses: {
-      type: DataTypes.INTEGER,
-      defaultValue: 100,
-    }
+        type: DataTypes.INTEGER,
+        defaultValue: 100,
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    userId: DataTypes.INTEGER,
 }, { paranoid: true })
 
 User.hasMany(Logger);
@@ -387,8 +466,8 @@ class Account {
      * @param {String} type the account type
      * @returns the total amout of found users
      */
-    static async count (type = "Basic") {
-        let {count} = await User.findAndCountAll({where: {type}})
+    static async count(type = "Basic") {
+        let { count } = await User.findAndCountAll({ where: { type } })
 
         return count;
     }
@@ -435,7 +514,7 @@ class Account {
  */
     static async createSafely(username, password, email, type = "Basic", firstName = null, lastName = null) {
         try {
-            if ( (await this.isDeleted(username))) {
+            if ((await this.isDeleted(username))) {
                 return false; // Account already exists
             }
 
@@ -492,11 +571,11 @@ class Account {
      */
     static async restoreAccount(username) {
         try {
-            if ( (await this.isDeleted(username))) {
+            if ((await this.isDeleted(username))) {
                 return false; // Account already exists
             }
 
-            await User.restore({where: {username}});
+            await User.restore({ where: { username } });
             await Log.createMessage("Acccount was restored", (await Account.getId(username)))
 
             return true;
@@ -637,16 +716,16 @@ class Basic extends Account {
     static async getUsers(username, search) {
         if (!(await this.isDeleted(username))) {
             return (await User.findAll({
-                where: 
-                { 
+                where:
+                {
                     [Op.or]: {
-                username: {[Op.like]: search},
-                email: {[Op.like]: search},
+                        username: { [Op.like]: search },
+                        email: { [Op.like]: search },
                     },
-                type: "Basic", 
-                deletedAt: null,
-                
-            }, raw: true, attributes: {
+                    type: "Basic",
+                    deletedAt: null,
+
+                }, raw: true, attributes: {
                     includes: [
                         "firstName",
                         "lastName",
@@ -672,8 +751,8 @@ class Basic extends Account {
     static async generateTokens(username) {
         let token = new this.Token(username);
 
-        
-       let res = await token.custom();
+
+        let res = await token.custom();
 
         return res !== null
     }
@@ -681,34 +760,34 @@ class Basic extends Account {
     /**
      * tokens can only be created by basic users
      */
-     static Token = class Token {
-  
-        constructor (username) {
+    static Token = class Token {
+
+        constructor(username) {
             this.key = require('crypto').randomBytes(64).toString('hex');
             this.username = username;
         }
-        
+
         /**
          * creates a custom token for users
          * @param {String} username username of the user
          * @returns returns a new object with the token
          */
-        async custom () {
+        async custom() {
             try {
-                if( !(await Token.canAdd(this.username)) ) return;
+                if (!(await Token.canAdd(this.username))) return;
 
-            let t = await Tokens.create({
-                key: this.key
-            })
+                let t = await Tokens.create({
+                    key: this.key
+                })
 
-            let a = await User.findOne({where: {username: this.username}})
+                let a = await User.findOne({ where: { username: this.username } })
 
-            t.setUser(a)
+                t.setUser(a)
 
-            await Log.createMessage("a token was created", (await Account.getId(this.username)), null, null, t.id)
+                await Log.createMessage("a token was created", (await Account.getId(this.username)), null, null, t.id)
 
 
-            return t;
+                return t;
             } catch (e) {
                 console.log(e)
                 return null;
@@ -720,18 +799,18 @@ class Basic extends Account {
          * @param {String} username username of the user
          * @returns true if the token was used successfully and false otherwise.
          */
-        async use () {
+        async use() {
             let username = this.username;
 
-            let t =  await Tokens.findOne({
-                include: { model: User, where: {username}},
+            let t = await Tokens.findOne({
+                include: { model: User, where: { username } },
             })
 
 
-            if( t.uses <= -1 ) Log.createMessage("Token overhead was reached. This error must be resolved", (await Account.getId(this.username)), null, null, t.id)
-            if( t.uses <= 0 ) return false
+            if (t.uses <= -1) Log.createMessage("Token overhead was reached. This error must be resolved", (await Account.getId(this.username)), null, null, t.id)
+            if (t.uses <= 0) return false
 
-            t.increment( {uses: -1})
+            t.increment({ uses: -1 })
             await Log.createMessage("a token was used", (await Account.getId(this.username)), null, null, t.id)
 
             return true
@@ -742,9 +821,9 @@ class Basic extends Account {
          * @param {String} username username of the user
          * @returns {Boolean} true if the user dosent havae a token, false otherwise
          */
-        static async canAdd (username) {
-            let t =  await Tokens.findOne({
-                include: { model: User, where: {username}},
+        static async canAdd(username) {
+            let t = await Tokens.findOne({
+                include: { model: User, where: { username } },
             })
 
             return t === null;
@@ -755,8 +834,8 @@ class Basic extends Account {
          * @param {String} value a valid key value
          * @returns {Boolean} true if the code is valid
          */
-        static async validate (value) {
-            let r = await Tokens.findOne({where: {key: value}, raw: true});
+        static async validate(value) {
+            let r = await Tokens.findOne({ where: { key: value }, raw: true });
             return r !== null;
         }
 
@@ -810,61 +889,61 @@ class Admin extends Account {
      * finds all basic users
      * @returns {ArrayList<Object>} gets a list of all basic users
      */
-    static async getUsers () {
-        let users = await User.findAll({where: {type: "Basic"}, attributes: ["firstName", "lastName", "username"], paranoid: false, raw: true});
+    static async getUsers() {
+        let users = await User.findAll({ where: { type: "Basic" }, attributes: ["firstName", "lastName", "username"], paranoid: false, raw: true });
 
         return users;
     }
 
-/**
- * gets a user via their username
- * @param {String} basic_username The username to look up
- * @returns {Promise<{ firstName: String, lastName: String, username: String, email: String, deleted: Boolean }>} User details
- */
-static async getUser(basic_username) {
-    // Ensure basic_username is provided
-    if (!basic_username) {
-        throw new Error("Username is required.");
+    /**
+     * gets a user via their username
+     * @param {String} basic_username The username to look up
+     * @returns {Promise<{ firstName: String, lastName: String, username: String, email: String, deleted: Boolean }>} User details
+     */
+    static async getUser(basic_username) {
+        // Ensure basic_username is provided
+        if (!basic_username) {
+            throw new Error("Username is required.");
+        }
+
+        // Find the user based on username and type
+        let u = await User.findOne({
+            where: {
+                type: "Basic",
+                username: basic_username
+            },
+            attributes: ["firstName", "lastName", "username", "email", "deletedAt"],
+            paranoid: false // Include soft-deleted users
+        });
+
+        // If user is found
+        if (u) {
+            // Destructure user object to extract required attributes
+            let { firstName, lastName, username, email, deletedAt } = u;
+
+            // Return an object containing user details and deleted status
+            return {
+                firstName,
+                lastName,
+                username,
+                email,
+                deleted: (deletedAt !== null) // Check if user has been deleted
+            };
+        } else {
+            // Handle case when user is not found
+            return null;
+        }
     }
 
-    // Find the user based on username and type
-    let u = await User.findOne({
-        where: {
-            type: "Basic",
-            username: basic_username
-        },
-        attributes: ["firstName", "lastName", "username", "email", "deletedAt"],
-        paranoid: false // Include soft-deleted users
-    });
-
-    // If user is found
-    if (u) {
-        // Destructure user object to extract required attributes
-        let { firstName, lastName, username, email, deletedAt } = u;
-        
-        // Return an object containing user details and deleted status
-        return {
-            firstName,
-            lastName,
-            username,
-            email,
-            deleted: (deletedAt !== null) // Check if user has been deleted
-        };
-    } else {
-        // Handle case when user is not found
-        return null;
+    /**
+     * gets all logs for a user
+     * @param {String} basic_username The username to look up
+     * @returns {Promise<{id, message}>}
+     */
+    static async getLogs(basic_username) {
+        let userId = await super.getId(basic_username);
+        return await Logger.findAll({ where: { userId }, raw: true })
     }
-}
-
-/**
- * gets all logs for a user
- * @param {String} basic_username The username to look up
- * @returns {Promise<{id, message}>}
- */
-static async getLogs (basic_username) {
-    let userId = await super.getId(basic_username);
-    return await Logger.findAll({where: {userId}, raw: true})
-}
 
 }
 
@@ -882,20 +961,20 @@ class Log {
      */
     static async createMessage(message, userId, fileId = null, roomId = null, tokenId = null) {
         if (userId == null) return;
-        let r = await Logger.create({ message});
+        let r = await Logger.create({ message });
 
-        if(userId) {
-        r.setUser((await User.findByPk(userId) ))
+        if (userId) {
+            r.setUser((await User.findByPk(userId)))
         }
-        if(fileId){
-        r.setFile((await Files.findByPk(fileId) ))
-        } 
-        if( roomId ) {
-        r.setRoom((await Room.findByPk(roomId) ))
+        if (fileId) {
+            r.setFile((await Files.findByPk(fileId)))
+        }
+        if (roomId) {
+            r.setRoom((await Room.findByPk(roomId)))
         }
 
-        if( tokenId ) {
-            r.setToken(await Tokens.findByPk(tokenId)) 
+        if (tokenId) {
+            r.setToken(await Tokens.findByPk(tokenId))
         }
 
         return r != null
@@ -992,7 +1071,7 @@ class File extends Basic {
 
         let curr_size = await File.getSize(username, null, true);
 
-        return curr_size < MAX_FILE_SIZE &&  curr_size + size < MAX_FILE_SIZE 
+        return curr_size < MAX_FILE_SIZE && curr_size + size < MAX_FILE_SIZE
 
     }
 
@@ -1009,7 +1088,7 @@ class File extends Basic {
     async fileCreate(encoding, mimetype, size, originalname, data, name = null) {
         let username = this.username;
         try {
-            if(!(await this.validateFile(size) )) return false;
+            if (!(await this.validateFile(size))) return false;
             if ((await Account.isDeleted(username))) return false;
             let u = await User.findOne({ where: { username } });
 
@@ -1116,7 +1195,7 @@ class File extends Basic {
      */
     static async getSize(username, roomId = null, raw = false) {
         let userId = await Account.getId(username);
-        let json = raw ? (await Files.sum("size", { where: { userId, roomId} })) : byteSize( (await Files.sum("size", { where: { userId, roomId} })) )
+        let json = raw ? (await Files.sum("size", { where: { userId, roomId } })) : byteSize((await Files.sum("size", { where: { userId, roomId } })))
 
         return json; //json.value + " " + json.long;
     }
@@ -1287,13 +1366,13 @@ class Groups {
 
         try {
 
-           
 
-             if( (await Members.destroy({ where: { roomId, userId } })) == 1 ) {
+
+            if ((await Members.destroy({ where: { roomId, userId } })) == 1) {
                 await Log.createMessage("a user in a room was removed", userId, null, roomId)
                 return true;
-             } 
-             return false;
+            }
+            return false;
         } catch (e) {
             return false;
         }
@@ -1380,7 +1459,7 @@ class Groups {
         return true;
     }
 
-    
+
     /**
      * this function checs to see if files can be added bases of file size
      * @param {number} roomId the id of the room to check
@@ -1390,7 +1469,7 @@ class Groups {
     static async validateFile(roomId, size) {
         let curr_size = await File.getSize(null, roomId, true);
 
-        return curr_size < MAX_FILE_SIZE_ROOM &&  curr_size + size < MAX_FILE_SIZE_ROOM;
+        return curr_size < MAX_FILE_SIZE_ROOM && curr_size + size < MAX_FILE_SIZE_ROOM;
     }
 
     /**
@@ -1407,14 +1486,14 @@ class Groups {
     static async fileCreate(roomId, encoding, mimetype, size, originalname, data, name = null) {
         try {
             let u = await Rooms.findByPk(roomId);
-            if(!u) return false;
-            if( !(await this.validateFile(roomId, size) ) ) return false;
+            if (!u) return false;
+            if (!(await this.validateFile(roomId, size))) return false;
 
             // Count files with the same originalname prefix
 
             // Create file entry
-            let f = await Files.create({ encoding, mimetype, size, originalname, data, name});
-            
+            let f = await Files.create({ encoding, mimetype, size, originalname, data, name });
+
             await f.setRoom(u)
 
             await Log.createMessage("a user in a room added a file", null, f.id, roomId)
@@ -1457,20 +1536,20 @@ class Groups {
 (async () => {
     await sequelize.sync({ force: false });
 
-    
+
     with (Basic) {
-        await signUp("a","a","a@a", "a", "a");
-        await signUp("b","b","b@b", "b", "b");
-        await signUp("c","c","c@c", "c", "c");
+        await signUp("a", "a", "a@a", "a", "a");
+        await signUp("b", "b", "b@b", "b", "b");
+        await signUp("c", "c", "c@c", "c", "c");
 
         await generateTokens("a");
         //await generateTokens("a");
     }
 
-    with(Admin) {
+    with (Admin) {
         await signUp("Malcolmstone", "Malcolmstone18$", "mstone@rollins.edu", "malcolm", "stone");
     }
-    
+
 
     with (Groups) {
         await createRoom("a", "b");
