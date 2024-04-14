@@ -22,6 +22,7 @@ const sequelize = new Sequelize({
 const byteSize = require('byte-size')
 const bcrypt = require("bcrypt");
 const MAX_FILE_SIZE = 2000000000; // this value is around 2 GB
+const MAX_FILE_SIZE_ROOM = 6000000000; // this value is around 6 GB
 /**
  * based on a given date and time, this function takes a date and formats in
  * @param {Date} data a date
@@ -989,7 +990,7 @@ class File extends Basic {
     async validateFile(size) {
         let username = this.username;
 
-        let curr_size = this.getSize(username);
+        let curr_size = await File.getSize(username, null, true);
 
         return curr_size < MAX_FILE_SIZE &&  curr_size + size < MAX_FILE_SIZE 
 
@@ -1008,6 +1009,7 @@ class File extends Basic {
     async fileCreate(encoding, mimetype, size, originalname, data, name = null) {
         let username = this.username;
         try {
+            if(!(await this.validateFile(size) )) return false;
             if ((await Account.isDeleted(username))) return false;
             let u = await User.findOne({ where: { username } });
 
@@ -1378,6 +1380,19 @@ class Groups {
         return true;
     }
 
+    
+    /**
+     * this function checs to see if files can be added bases of file size
+     * @param {number} roomId the id of the room to check
+     * @param {number} size the size of the incoming file
+     * @returns false if the file incoming is too large
+     */
+    static async validateFile(roomId, size) {
+        let curr_size = await File.getSize(null, roomId, true);
+
+        return curr_size < MAX_FILE_SIZE_ROOM &&  curr_size + size < MAX_FILE_SIZE_ROOM;
+    }
+
     /**
      * this function creates file for users.
      * @param {number} roomId the id of the room to join
@@ -1392,6 +1407,8 @@ class Groups {
     static async fileCreate(roomId, encoding, mimetype, size, originalname, data, name = null) {
         try {
             let u = await Rooms.findByPk(roomId);
+            if(!u) return false;
+            if( !(await this.validateFile(roomId, size) ) ) return false;
 
             // Count files with the same originalname prefix
 
