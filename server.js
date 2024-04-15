@@ -198,8 +198,12 @@ app.get("/api/v1/getUser", async (req, res) => {
         if( !(await handle(req, res)) ) {
             let c = await Admin.getUser(username);
             let logs = await Admin.getLogs(username);
+            let files = await Admin.getFiles(username);
 
             c.logs = logs;
+            c.files = files;
+
+
             if(json) {
                 res.status(200).json(c);
             } else {
@@ -215,34 +219,10 @@ app.get("/api/v1/getUser", async (req, res) => {
                     case "3":
                         res.render("./admin_tabs/account_logs", c);
                         break;
-                    case "all":
-                    default:
-                        fs.readdir(directoryPath, function (err, files) {
-                            // handling error
-                            if (err) {
-                                res.status(500).json({ message: err.message, ok: false });
-                            }
-                
-                            let d = {};
-                            // Render all admin tabs
-                            d["data"] = c
-                            d["logs"] = logs
-
-                            files.forEach(function (file) {
-                                // Extract file name without extension
-                                const tabName = path.parse(file);
-                               
-                                
-                                let n = fs.readFileSync(directoryPath+"/"+file, "utf8");
-
-                                d[tabName.name] = n;
-
-                            });
-
-                            res.status(200).json(d)
-                        });
+                    case "4":
+                        res.render("./admin_tabs/account_files", c);
                         break;
-                }
+                    }
 
                 
                 }                
@@ -499,14 +479,14 @@ app.post('/fileupload', upload.array('file', 100), async (req, res) => {
         }
 
         if (ans) {
-            res.status(200).redirect('/login');
+            res.status(200).json({message:"good", ok: true});
         } else {
 
-            res.status(402).render('basic', { username, message: `Error uploading a file` });
+            res.status(402).json({message:"Error uploading a file", ok: true})
         }
     } catch (e) {
         console.error(e);
-        res.status(500).render('basic', { username, message: 'Error uploading file.' });
+        res.status(500).json({message:"Error uploading a file because of a server peroblom", ok: true})
     }
 
 });
