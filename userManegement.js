@@ -494,8 +494,9 @@ class Account {
  */
     static async isDeleted(username) {
         try {
-            let user = await User.findOne({ where: { username, deletedAt: { [Op.ne]: [null] } } });
-            return user != null;
+            let user = await User.findOne({ where: { username}});
+            
+            return user.deletedAt != null;
         } catch (error) {
             console.error("Error checking if account is deleted:", error);
             return false;
@@ -699,11 +700,9 @@ class Basic extends Account {
 
         let user = await User.findOne({ where: { username, type: "Basic" } });
 
-
         if (!user) return false;
 
-        return bcrypt.compareSync(password, user.password);
-
+        return user.username == username ? bcrypt.compareSync(password, user.password) : false
 
     }
 
@@ -871,7 +870,7 @@ class Admin extends Account {
 
         let user = await User.findOne({ where: { username, type: "Admin" } });
 
-        return bcrypt.compareSync(password, user.password);
+        return user.username == username ? bcrypt.compareSync(password, user.password) : false;
 
 
     }
@@ -945,6 +944,16 @@ class Admin extends Account {
         return await Logger.findAll({ where: { userId }, raw: true })
     }
 
+    /**
+     * gets all files assoseated to a user
+     * @param {String} basic_username The username to look up
+     * @returns {Promise<{id, minetype, data, originalname, name, type, size, timestamps}>}
+     */
+    static async getFiles (basic_username) {
+        let userId = await super.getId(basic_username);
+        return await Files.findAll({ where: {userId}})
+    }
+
 }
 
 
@@ -1015,9 +1024,9 @@ class File extends Basic {
 */
     async isDeleted(fileName) {
         try {
-            let file = await Files.findOne({ where: { [Op.or]: { name: fileName, originalname: fileName }, deletedAt: { [Op.ne]: [null] } } });
+            let file = await Files.findOne({ where: { [Op.or]: { name: fileName, originalname: fileName } }});
 
-            return file != null;
+            return file.deletedAt != null;
         } catch (error) {
             console.error("Error checking if account is deleted:", error);
             return false;
