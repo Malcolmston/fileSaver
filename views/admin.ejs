@@ -105,6 +105,11 @@
         <button class="nav-link" id="pills-logs-tab" data-bs-toggle="pill" data-bs-target="#pills-logs" type="button"
           role="tab" aria-controls="pills-logs" aria-selected="false">Account logs</button>
       </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-files-tab" data-bs-toggle="pill" data-bs-target="#pills-files" type="button"
+          role="tab" aria-controls="pills-files" aria-selected="false">Account files</button>
+      </li>
     </ul>
 
     <div class="tab-content" id="pills-tabContent">
@@ -120,6 +125,11 @@
       <div class="tab-pane fade" id="pills-logs" role="tabpanel" aria-labelledby="pills-logs-tab" tabindex="0">
         <iframe id="logs" src=""></iframe>
       </div>
+
+      <div class="tab-pane fade" id="pills-files" role="tabpanel" aria-labelledby="pills-files-tab" tabindex="0">
+        <iframe id="files" src=""></iframe>
+      </div>
+
     </div>
   </div>
 
@@ -186,6 +196,7 @@
           document.querySelector("#home").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=1`
           document.querySelector("#account").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=2`
           document.querySelector("#logs").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=3`
+          document.querySelector("#files").src = `/api/v1/getUser?username=${arr[1].innerText}&json=false&page=4`
 
 
         } else {
