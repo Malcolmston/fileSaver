@@ -213,14 +213,19 @@ var submitData = async function (ev) {
   fetch('/fileupload', {
     method: 'POST',
     body: formData
-  })
+  }).then(data => data.json() )
     .then(data => {
-      toast_message.success('Files were uploaded successfully');
-      reload(); // Reload the page or perform other actions
+      if(data.ok){
+        toast_message.success('Files were uploaded successfully');
+        reload(); // Reload the page or perform other actions
+      } else {
+        toast_message.error(data.message);
+      }
+      
     })
     .catch(error => {
       console.error(error);
-      toast_message.error('There was a problem with the fetch operation');
+      toast_message.error("Failed "+error.message);
     });
 
   document.querySelector("#prevew").innerHTML = ""
